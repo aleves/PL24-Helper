@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Renault
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  PL24 Helper - Renault
 // @author       aleves
 // @match        https://www.partslink24.com/renault/*
