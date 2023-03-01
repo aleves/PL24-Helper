@@ -7,6 +7,7 @@
 // @match        https://www.partslink24.com/renault/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=partslink24.com
 // @grant        none
+// @downloadURL  https://raw.githubusercontent.com/aleves/PL24-Helper/main/userscript/Renault.js
 
 // ==/UserScript==
 
