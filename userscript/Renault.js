@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Renault
 // @namespace    http://tampermonkey.net/
-// @version      0.4
+// @version      0.41
 // @description  PL24 Helper - Renault
 // @author       aleves
 // @match        https://www.partslink24.com/renault/*
@@ -79,7 +79,7 @@
 		});
 	}
 
-	// Skapa en flyttbar ruta med inställningar
+	// Create a moveable settings window
 	const settingsWindow = document.createElement("div");
 	settingsWindow.id = "settingsWindow";
 	Object.assign(settingsWindow.style, {
@@ -92,21 +92,11 @@
 		padding: "10px",
 		zIndex: "999",
 	});
+
+	// Add the settings window to the page
 	document.body.appendChild(settingsWindow);
 
-	// Lägg till inställningsrutan till sidan
-	document.body.appendChild(settingsWindow);
-
-	// Funktion för att visa/ta bort inställningsrutan
-	function toggleSettings() {
-		if (settingsWindow.style.display === "none") {
-			settingsWindow.style.display = "block";
-		} else {
-			settingsWindow.style.display = "none";
-		}
-	}
-
-	// Skapa knapp för att visa inställningsrutan
+	// Create button for showing the settings window
 	const settingsButton = document.createElement("button");
 	settingsButton.textContent = "Inställningar";
 	Object.assign(settingsButton.style, {
@@ -117,20 +107,17 @@
 		zIndex: "999",
 	});
 
-	// Lägg till knappen till sidan
+	// Add the button to the page
 	logoDiv.parentNode.insertBefore(settingsButton, logoDiv);
 
-	// Lägg till klick-händelse till knappen för att visa inställningsrutan
-	settingsButton.addEventListener("click", toggleSettings);
-
-	// Skapa checkbox för varje inställning
+	// Create checkbox for each setting
 	const settings = [
 		{ id: "setting1", label: "Inställning 1" },
 		{ id: "setting2", label: "Inställning 2" },
 		{ id: "setting3", label: "Inställning 3" },
 	];
 
-	settings.forEach((setting) => {
+	for (const setting of settings) {
 		const checkbox = document.createElement("input");
 		checkbox.type = "checkbox";
 		checkbox.id = setting.id;
@@ -139,13 +126,18 @@
 		label.textContent = setting.label;
 		label.setAttribute("for", setting.id);
 
-		// Spara inställningen i localStorage vid ändring
+		// Save the setting in localStorage on change
 		checkbox.addEventListener("change", () => {
 			localStorage.setItem(setting.id, checkbox.checked);
 		});
 
-		// Lägg till checkbox och label till inställningsrutan
+		// Add checkbox and label to settings window
 		settingsWindow.appendChild(checkbox);
 		settingsWindow.appendChild(label);
+	}
+
+	// Toggle the settings window on button click
+	settingsButton.addEventListener("click", () => {
+		settingsWindow.style.display = settingsWindow.style.display === "none" ? "block" : "none";
 	});
 })();
