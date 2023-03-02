@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Renault
 // @namespace    http://tampermonkey.net/
-// @version      0.41
+// @version      0.42
 // @description  PL24 Helper - Renault
 // @author       aleves
 // @match        https://www.partslink24.com/renault/*
@@ -92,6 +92,30 @@
 		padding: "10px",
 		zIndex: "999",
 	});
+
+	let isDragging = false;
+	let offsetX = 0;
+	let offsetY = 0;
+
+	// Add event listeners for dragging the window
+	settingsWindow.addEventListener("mousedown", function (event) {
+		isDragging = true;
+		offsetX = event.offsetX;
+		offsetY = event.offsetY;
+	});
+
+	settingsWindow.addEventListener("mouseup", function () {
+		isDragging = false;
+	});
+
+	settingsWindow.addEventListener("mousemove", function (event) {
+		if (isDragging) {
+			settingsWindow.style.left = event.pageX - offsetX + "px";
+			settingsWindow.style.top = event.pageY - offsetY + "px";
+		}
+	});
+
+	document.body.appendChild(settingsWindow);
 
 	// Add the settings window to the page
 	document.body.appendChild(settingsWindow);
