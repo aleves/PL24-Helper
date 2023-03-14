@@ -1,13 +1,12 @@
 /* eslint-disable no-control-regex */
 /* eslint-disable no-undef */
 // ==UserScript==
-// @name         PL24 Helper - Citroën
+// @name         PL24 Helper - Peugeot
 // @namespace    Violentmonkey Scripts
-// @version      1.01
-// @description  PL24 Helper - Citroën
+// @version      1.00
+// @description  PL24 Helper - Peugeot
 // @author       aleves
-// @match        https://www.partslink24.com/psa/citroen_parts/*
-// @include      https://www.partslink24.com/psa/citroenDs_parts/*
+// @match        https://www.partslink24.com/psa/peugeot_parts/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=partslink24.com
 // @grant        none
 // ==/UserScript==
@@ -18,7 +17,7 @@
     // Logotyp för att indikera att skriptet är igång
 
     const logoDiv = document.createElement("div");
-    logoDiv.textContent = "PL24 Helper - Citroën";
+    logoDiv.textContent = "PL24 Helper - Peugeot";
     Object.assign(logoDiv.style,
         {
             display: "inline-block",
@@ -348,7 +347,7 @@
 
             const link = document.createElement("a");
             const [, , , , , , number] = modifiedImageSrc.split("?path=")[1].split("&")[0].split("/");
-            const filename = `citroen_${number}`;
+            const filename = `peugeot_${number}`;
             link.download = filename;
             link.href = modifiedImageSrc;
             link.click();
