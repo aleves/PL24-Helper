@@ -1,13 +1,12 @@
 /* eslint-disable no-control-regex */
 /* eslint-disable no-undef */
 // ==UserScript==
-// @name         PL24 Helper - Renault
+// @name         PL24 Helper - Dacia
 // @namespace    Violentmonkey Scripts
-// @version      1.02
-// @description  PL24 Helper - Renault
+// @version      1.00
+// @description  PL24 Helper - Dacia
 // @author       aleves
-// @match        https://www.partslink24.com/renault/*
-// @exclude      https://www.partslink24.com/renault/dacia_parts/*
+// @match        https://www.partslink24.com/renault/dacia_parts/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=partslink24.com
 // @grant        none
 // ==/UserScript==
@@ -18,7 +17,7 @@
     // Logotyp för att indikera att skriptet är igång
 
     const logoDiv = document.createElement("div");
-    logoDiv.textContent = "PL24 Helper - Renault";
+    logoDiv.textContent = "PL24 Helper - Dacia";
     Object.assign(logoDiv.style,
         {
             display: "inline-block",
@@ -373,8 +372,8 @@
                 .replace(/&scalefac=[^&]*/, "&scalefac=1");
 
             const link = document.createElement("a");
-            const [, carMake, , number] = modifiedImageSrc.split("?path=")[1].split("&")[0].split("/");
-            const filename = `${carMake}_${number}`;
+            const [, , , number] = modifiedImageSrc.split("?path=")[1].split("&")[0].split("/");
+            const filename = `dacia_${number}`;
             link.download = filename;
             link.href = modifiedImageSrc;
             link.click();
