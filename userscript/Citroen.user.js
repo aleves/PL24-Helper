@@ -1,12 +1,12 @@
 /* eslint-disable no-control-regex */
 /* eslint-disable no-undef */
 // ==UserScript==
-// @name         PL24 Helper - Renault
+// @name         PL24 Helper - Citroën
 // @namespace    Violentmonkey Scripts
-// @version      1.01
-// @description  PL24 Helper - Renault
+// @version      1.00
+// @description  PL24 Helper - Citroën
 // @author       aleves
-// @match        https://www.partslink24.com/renault/*
+// @match        https://www.partslink24.com/psa/citroen_parts/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=partslink24.com
 // @grant        none
 // ==/UserScript==
@@ -17,7 +17,7 @@
     // Logotyp för att indikera att skriptet är igång
 
     const logoDiv = document.createElement("div");
-    logoDiv.textContent = "PL24 Helper - Renault";
+    logoDiv.textContent = "PL24 Helper - Citroën";
     Object.assign(logoDiv.style,
         {
             display: "inline-block",
@@ -76,44 +76,17 @@
 
     window.addEventListener("wheel", handleScrollInsideGlassPane);
 
-    // Ersätt icke-ASCII tecken med tecknet som PL24 använder
-
-    const unknownChar = "�";
-    const inputField = document.querySelector("#searchTerm");
-    const searchButton = document.querySelector(
-        "#searchForm button[type=\"submit\"]"
-    );
-
-    if (inputField && searchButton)
-    {
-        const replaceNonASCII = (value) =>
-            value.replace(/[^\x00-\x7F]+/g, unknownChar);
-
-        inputField.addEventListener("keydown", (e) =>
-        {
-            if (e.key === "Enter")
-            {
-                inputField.value = replaceNonASCII(inputField.value);
-            }
-        });
-
-        searchButton.addEventListener("click", () =>
-        {
-            inputField.value = replaceNonASCII(inputField.value);
-        });
-    }
-
     // Om ett cirkapris saknas skapas en knapp för att söka direkt på Bildelsbasen (öppnas i ny flik)
 
-    if (document.querySelector("#partinfoDialog"))
+    if (document.querySelector("#partin4dlg"))
     {
-        const targetNode = document.querySelector("#partinfoDialog");
+        const targetNode = document.querySelector("#partin4dlg");
         const runCode = () =>
         {
-            const existingNewPrices = document.querySelectorAll("#partinfoForm td.partinfoPriceCol span.new-price");
+            const existingNewPrices = document.querySelectorAll("#partin4content td.partinfoPriceCol span.new-price");
             if (existingNewPrices.length > 0) return;
 
-            const priceTds = document.querySelectorAll("#partinfoForm td.partinfoPriceCol");
+            const priceTds = document.querySelectorAll("#partin4content td.partinfoPriceCol:not(.partin4partspromCol)");
             priceTds.forEach((td) =>
             {
                 const priceText = td.innerText.trim()
@@ -168,11 +141,11 @@
         {
             mutationsList.forEach((mutation) =>
             {
-                if (mutation.type === "childList" && document.querySelector("#partinfoDialog > div.blockUI.blockOverlay"))
+                if (mutation.type === "childList" && document.querySelector("#partin4dlg > div.blockUI.blockOverlay"))
                 {
                     const intervalId = setInterval(() =>
                     {
-                        const partinfoTable = document.querySelector("#partinfoMainTable tbody");
+                        const partinfoTable = document.querySelector("#partin4MainTable tbody");
                         if (partinfoTable && partinfoTable.childElementCount > 0)
                         {
                             clearInterval(intervalId);
@@ -190,12 +163,12 @@
 
     // Gör om PC-nummer i rutorna som öppnas till knappar som kopierar numret åt användaren
 
-    if (document.querySelector("#partinfoDialog"))
+    if (document.querySelector("#partin4dlg"))
     {
-        const targetNode = document.querySelector("#partinfoDialog");
+        const targetNode = document.querySelector("#partin4dlg");
         const runCode = () =>
         {
-            const partnoTds = document.querySelectorAll("#partinfoForm td.partinfoPartnoCol");
+            const partnoTds = document.querySelectorAll("#partin4content td.partinfoPartnoCol");
             partnoTds.forEach(td =>
             {
                 if (td.innerText.trim() === "")
@@ -265,11 +238,11 @@
         {
             mutationsList.forEach(mutation =>
             {
-                if (mutation.type === "childList" && document.querySelector("#partinfoDialog > div.blockUI.blockOverlay"))
+                if (mutation.type === "childList" && document.querySelector("#partin4dlg > div.blockUI.blockOverlay"))
                 {
                     const intervalId = setInterval(() =>
                     {
-                        const partinfoTable = document.querySelector("#partinfoMainTable tbody");
+                        const partinfoTable = document.querySelector("#partin4MainTable tbody");
                         if (partinfoTable && partinfoTable.childElementCount > 0)
                         {
                             clearInterval(intervalId);
@@ -287,24 +260,27 @@
 
     // Ändrar färgen på 'Nummerändring' så att risken att man missar det är lägre
 
-    if (document.querySelector("#partinfoDialog"))
+    const partin4ContentElement = document.querySelector("#partin4content");
+
+    if (partin4ContentElement)
     {
-        const supersessionElement = document.querySelector("#partinfoSupersession");
-        const headlineElement = document.querySelector("#partinfoSupersessionHeadline");
-        const observer = new MutationObserver(mutations =>
+        const observer = new MutationObserver(() =>
         {
-            mutations.forEach(mutation =>
+            if (partin4ContentElement.querySelector("h2"))
             {
-                if (mutation.attributeName === "style" && supersessionElement.style.display === "block")
-                {
-                    headlineElement.style.backgroundImage = "linear-gradient(to right, #ff6a2b, #f7c400)";
-                }
-            });
+                const partin4HeaderElement = partin4ContentElement.querySelector("h2");
+                partin4HeaderElement.style.backgroundImage = "linear-gradient(to right, #ff6a2b, #f7c400)";
+            }
         });
-        observer.observe(supersessionElement,
+
+        observer.observe(partin4ContentElement,
             {
-                attributes: true
+                childList: true
             });
+    }
+    else
+    {
+        console.log("#partin4content not found.");
     }
 
     // Skapar en knapp så att man kan ladda ner illustrationen som är framme
@@ -372,8 +348,8 @@
                 .replace(/&scalefac=[^&]*/, "&scalefac=1");
 
             const link = document.createElement("a");
-            const [, carMake, , number] = modifiedImageSrc.split("?path=")[1].split("&")[0].split("/");
-            const filename = `${carMake}_${number}`;
+            const [, , , , , , number] = modifiedImageSrc.split("?path=")[1].split("&")[0].split("/");
+            const filename = `citroen_${number}`;
             link.download = filename;
             link.href = modifiedImageSrc;
             link.click();
