@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Renault
 // @namespace    Violentmonkey Scripts
-// @version      1.02
+// @version      1.03
 // @description  PL24 Helper - Renault
 // @author       aleves
 // @match        https://www.partslink24.com/renault/*
@@ -363,13 +363,19 @@
         const downloadBtn = document.getElementById("new-btn");
         downloadBtn.addEventListener("click", () =>
         {
+            ImageView.sendMessage("FitToWindow", null);
+
             const mainImage = document.querySelector("#MainImage");
             const imageSrc = mainImage.getAttribute("src");
 
+            const bboxRegex = /&bbox=[^&]*?(\d+)%2C(\d+)%2C(\d+)%2C(\d+)/;
+            const bboxMatch = imageSrc.match(bboxRegex);
+            const [, , , width, height] = bboxMatch;
+
             const modifiedImageSrc = imageSrc
                 .replace(/(&bbox=[^&]*?)0*\d{1,3}(?=[^&]*?(&|$))/, "$10")
-                .replace(/&width=[^&]*/, "&width=1024")
-                .replace(/&height=[^&]*/, "&height=1024")
+                .replace(/&width=[^&]*/, "&width=" + width)
+                .replace(/&height=[^&]*/, "&height=" + height)
                 .replace(/&scalefac=[^&]*/, "&scalefac=1");
 
             const link = document.createElement("a");

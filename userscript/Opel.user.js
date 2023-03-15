@@ -1,12 +1,12 @@
 /* eslint-disable no-control-regex */
 /* eslint-disable no-undef */
 // ==UserScript==
-// @name         PL24 Helper - Dacia
+// @name         PL24 Helper - Opel
 // @namespace    Violentmonkey Scripts
-// @version      1.01
-// @description  PL24 Helper - Dacia
+// @version      1.00
+// @description  PL24 Helper - Opel
 // @author       aleves
-// @match        https://www.partslink24.com/renault/dacia_parts/*
+// @match        https://www.partslink24.com/opel/opel_parts/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=partslink24.com
 // @grant        none
 // ==/UserScript==
@@ -17,7 +17,7 @@
     // Logotyp för att indikera att skriptet är igång
 
     const logoDiv = document.createElement("div");
-    logoDiv.textContent = "PL24 Helper - Dacia";
+    logoDiv.textContent = "PL24 Helper - Opel";
     Object.assign(logoDiv.style,
         {
             display: "inline-block",
@@ -76,44 +76,17 @@
 
     window.addEventListener("wheel", handleScrollInsideGlassPane);
 
-    // Ersätt icke-ASCII tecken med tecknet som PL24 använder
-
-    const unknownChar = "�";
-    const inputField = document.querySelector("#searchTerm");
-    const searchButton = document.querySelector(
-        "#searchForm button[type=\"submit\"]"
-    );
-
-    if (inputField && searchButton)
-    {
-        const replaceNonASCII = (value) =>
-            value.replace(/[^\x00-\x7F]+/g, unknownChar);
-
-        inputField.addEventListener("keydown", (e) =>
-        {
-            if (e.key === "Enter")
-            {
-                inputField.value = replaceNonASCII(inputField.value);
-            }
-        });
-
-        searchButton.addEventListener("click", () =>
-        {
-            inputField.value = replaceNonASCII(inputField.value);
-        });
-    }
-
     // Om ett cirkapris saknas skapas en knapp för att söka direkt på Bildelsbasen (öppnas i ny flik)
 
-    if (document.querySelector("#partinfoDialog"))
+    if (document.querySelector("#partin4dlg"))
     {
-        const targetNode = document.querySelector("#partinfoDialog");
+        const targetNode = document.querySelector("#partin4dlg");
         const runCode = () =>
         {
-            const existingNewPrices = document.querySelectorAll("#partinfoForm td.partinfoPriceCol span.new-price");
+            const existingNewPrices = document.querySelectorAll("#partin4content td.partinfoPriceCol span.new-price");
             if (existingNewPrices.length > 0) return;
 
-            const priceTds = document.querySelectorAll("#partinfoForm td.partinfoPriceCol");
+            const priceTds = document.querySelectorAll("#partin4content td.partinfoPriceCol:not(.partin4partspromCol)");
             priceTds.forEach((td) =>
             {
                 const priceText = td.innerText.trim()
@@ -132,7 +105,8 @@
                 {
                     const partNumber = td.closest("tr")
                         .querySelector(".partinfoPartnoCol")
-                        .innerText.trim();
+                        .innerText.trim().replace(/[()]/g, "");
+                        
                     const button = document.createElement("button");
                     button.innerText = td.innerText;
                     button.title = "Sök på Bildelsbasen (Ny flik)";
@@ -154,7 +128,7 @@
                         margin: "0 auto 0 auto",
                         borderBottom: "1px solid #e0e0e0",
                         display: "block",
-                        width: "100%",
+                        width: "150%",
                         boxSizing: "border-box",
                         textAlign: "center"
                     };
@@ -168,11 +142,11 @@
         {
             mutationsList.forEach((mutation) =>
             {
-                if (mutation.type === "childList" && document.querySelector("#partinfoDialog > div.blockUI.blockOverlay"))
+                if (mutation.type === "childList" && document.querySelector("#partin4dlg > div.blockUI.blockOverlay"))
                 {
                     const intervalId = setInterval(() =>
                     {
-                        const partinfoTable = document.querySelector("#partinfoMainTable tbody");
+                        const partinfoTable = document.querySelector("#partin4MainTable tbody");
                         if (partinfoTable && partinfoTable.childElementCount > 0)
                         {
                             clearInterval(intervalId);
@@ -190,12 +164,12 @@
 
     // Gör om PC-nummer i rutorna som öppnas till knappar som kopierar numret åt användaren
 
-    if (document.querySelector("#partinfoDialog"))
+    if (document.querySelector("#partin4dlg"))
     {
-        const targetNode = document.querySelector("#partinfoDialog");
+        const targetNode = document.querySelector("#partin4dlg");
         const runCode = () =>
         {
-            const partnoTds = document.querySelectorAll("#partinfoForm td.partinfoPartnoCol");
+            const partnoTds = document.querySelectorAll("#partin4content td.partinfoPartnoCol");
             partnoTds.forEach(td =>
             {
                 if (td.innerText.trim() === "")
@@ -208,7 +182,7 @@
                 btn.title = "Kopiera nummer";
                 btn.addEventListener("click", event =>
                 {
-                    navigator.clipboard.writeText(td.innerText.trim());
+                    navigator.clipboard.writeText(td.innerText.trim().replace(/[()]/g, ""));
                     const notification = document.createElement("div");
                     notification.innerText = "Kopierad!";
                     Object.assign(notification.style,
@@ -265,11 +239,11 @@
         {
             mutationsList.forEach(mutation =>
             {
-                if (mutation.type === "childList" && document.querySelector("#partinfoDialog > div.blockUI.blockOverlay"))
+                if (mutation.type === "childList" && document.querySelector("#partin4dlg > div.blockUI.blockOverlay"))
                 {
                     const intervalId = setInterval(() =>
                     {
-                        const partinfoTable = document.querySelector("#partinfoMainTable tbody");
+                        const partinfoTable = document.querySelector("#partin4MainTable tbody");
                         if (partinfoTable && partinfoTable.childElementCount > 0)
                         {
                             clearInterval(intervalId);
@@ -287,24 +261,23 @@
 
     // Ändrar färgen på 'Nummerändring' så att risken att man missar det är lägre
 
-    if (document.querySelector("#partinfoDialog"))
+    if (document.querySelector("#partin4content"))
     {
-        const supersessionElement = document.querySelector("#partinfoSupersession");
-        const headlineElement = document.querySelector("#partinfoSupersessionHeadline");
-        const observer = new MutationObserver(mutations =>
+        const partin4content = document.querySelector("#partin4content");
+        const observer = new MutationObserver(() => 
         {
-            mutations.forEach(mutation =>
+            const partin4TabSupersessionsLink = document.querySelector("#partin4Tab-supersessions > a");
+            if (partin4TabSupersessionsLink && partin4TabSupersessionsLink.getAttribute("href") === "#partin4TabDiv-supersessions") 
             {
-                if (mutation.attributeName === "style" && supersessionElement.style.display === "block")
+                const partInfoTabsUl = document.querySelector("#partInfoTabs > ul");
+                if (partInfoTabsUl) 
                 {
-                    headlineElement.style.backgroundImage = "linear-gradient(to right, #ff6a2b, #f7c400)";
+                    partInfoTabsUl.style.backgroundImage = "linear-gradient(to right, #ff6a2b, #f7c400)";
                 }
-            });
+            }
         });
-        observer.observe(supersessionElement,
-            {
-                attributes: true
-            });
+
+        observer.observe(partin4content, { childList: true });
     }
 
     // Skapar en knapp så att man kan ladda ner illustrationen som är framme
@@ -378,8 +351,8 @@
                 .replace(/&scalefac=[^&]*/, "&scalefac=1");
 
             const link = document.createElement("a");
-            const [, , , number] = modifiedImageSrc.split("?path=")[1].split("&")[0].split("/");
-            const filename = `dacia_${number}`;
+            const [, , , , number] = modifiedImageSrc.split("?path=")[1].split("&")[0].split("/");
+            const filename = `Opel_${number}`;
             link.download = filename;
             link.href = modifiedImageSrc;
             link.click();
