@@ -3,10 +3,10 @@
 // ==UserScript==
 // @name         PL24 Helper - Dacia
 // @namespace    Violentmonkey Scripts
-// @version      1.01
+// @version      2.00
 // @description  PL24 Helper - Dacia
 // @author       aleves
-// @match        https://www.partslink24.com/renault/dacia_parts/*
+// @match        https://www.partslink24.com/p5/latest/p5.html#%2Fp5renault~dacia_parts*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=partslink24.com
 // @grant        none
 // ==/UserScript==
@@ -14,106 +14,59 @@
 {
     "use strict";
 
+    var debug = false;
+    if (debug)
+    {
+        enable_logging();
+    }
+
     // Logotyp för att indikera att skriptet är igång
 
     const logoDiv = document.createElement("div");
     logoDiv.textContent = "PL24 Helper - Dacia";
-    Object.assign(logoDiv.style,
-        {
-            display: "inline-block",
-            fontFamily: "Arial, sans-serif",
-            fontSize: "14px",
-            fontWeight: "bold",
-            color: "#ffffff",
-            background: "linear-gradient(to top right, #008080, #66b2b2)",
-            padding: "5px 10px",
-            borderRadius: "8px",
-            position: "absolute",
-            right: "10px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            zIndex: "666"
-        });
-    document.querySelector("#linksAndBreadCrumbs")
-        .appendChild(logoDiv);
+    Object.assign(logoDiv.style, {
+        display: "inline-block",
+        fontFamily: "Arial, sans-serif",
+        fontSize: "14px",
+        fontWeight: "bold",
+        color: "#ffffff",
+        background: "linear-gradient(to top right, #009f70, #bbcf00)",
+        padding: "5px 10px",
+        borderRadius: "8px",
+        position: "relative",
+        right: "2rem",
+        zIndex: "666"
+    });
 
-    // Scrollhjulet kan zooma illustrationen in och ut
-
-    const debounce =
-        (func, wait = 10) =>
-            (...args) =>
-                setTimeout(() => func(...args), wait);
-
-    const zoomPlusButton = document.querySelector("#zoom-plus");
-    const zoomMinusButton = document.querySelector("#zoom-minus");
-    //const glassPane = document.querySelector("#GlassPane");
-
-    const handleScrollInsideGlassPane = debounce((event) =>
+    const observer = new MutationObserver((mutations) =>
     {
-        const isZoomInDisabled =
-            zoomPlusButton.classList.contains("toolbarBtnDisabled");
-        const isZoomOutDisabled =
-            zoomMinusButton.classList.contains("toolbarBtnDisabled");
-
-        if (
-            event.target.closest("#GlassPane") &&
-            event.deltaY < 0 &&
-            !isZoomInDisabled
-        )
+        for (const mutation of mutations)
         {
-            ImageView.sendMessage("ZoomIn", null);
-        }
-
-        if (
-            event.target.closest("#GlassPane") &&
-            event.deltaY > 0 &&
-            !isZoomOutDisabled
-        )
-        {
-            ImageView.sendMessage("ZoomOut", null);
+            if (mutation.addedNodes.length > 0 && mutation.addedNodes[0].matches("#dealer_header_container > div"))
+            {
+                const headerContainer = document.querySelector("#dealer_header_container");
+                const headerContainerDiv = document.querySelector("#dealer_header_container > div");
+                headerContainer.insertBefore(logoDiv, headerContainerDiv);
+                observer.disconnect();
+            }
         }
     });
 
-    window.addEventListener("wheel", handleScrollInsideGlassPane);
-
-    // Ersätt icke-ASCII tecken med tecknet som PL24 använder
-
-    const unknownChar = "�";
-    const inputField = document.querySelector("#searchTerm");
-    const searchButton = document.querySelector(
-        "#searchForm button[type=\"submit\"]"
-    );
-
-    if (inputField && searchButton)
-    {
-        const replaceNonASCII = (value) =>
-            value.replace(/[^\x00-\x7F]+/g, unknownChar);
-
-        inputField.addEventListener("keydown", (e) =>
-        {
-            if (e.key === "Enter")
-            {
-                inputField.value = replaceNonASCII(inputField.value);
-            }
-        });
-
-        searchButton.addEventListener("click", () =>
-        {
-            inputField.value = replaceNonASCII(inputField.value);
-        });
-    }
+    observer.observe(document.querySelector("#dealer_header_container"), { childList: true });
 
     // Om ett cirkapris saknas skapas en knapp för att söka direkt på Bildelsbasen (öppnas i ny flik)
 
-    if (document.querySelector("#partinfoDialog"))
+    if (document.querySelector("#content"))
     {
-        const targetNode = document.querySelector("#partinfoDialog");
+        const targetNode = document.querySelector("#content");
         const runCode = () =>
         {
-            const existingNewPrices = document.querySelectorAll("#partinfoForm td.partinfoPriceCol span.new-price");
+            const existingNewPrices = document.querySelectorAll("[id*=\"_c\"] [class*=\"_price\"] span.new-price");
             if (existingNewPrices.length > 0) return;
 
-            const priceTds = document.querySelectorAll("#partinfoForm td.partinfoPriceCol");
+            const priceTds = [...document.querySelectorAll("[class*=acc][class*=p5t][class*=price]")]
+                .flatMap(div => div.className.endsWith("_acc") ? [] : [div])
+                .sort((a, b) => a.className > b.className ? 1 : -1);
             priceTds.forEach((td) =>
             {
                 const priceText = td.innerText.trim()
@@ -124,15 +77,15 @@
                     const newPrice = price / 2;
                     const span = document.createElement("span");
                     span.innerText = `\n / ${newPrice.toLocaleString("sv-SE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                    span.style.fontSize = "9.25px";
+                    span.style.fontSize = "11.75px";
                     span.classList.add("new-price");
                     td.appendChild(span);
                 }
                 else
                 {
-                    const partNumber = td.closest("tr")
-                        .querySelector(".partinfoPartnoCol")
-                        .innerText.trim();
+                    const partNumber = td.closest("[id*=\"_c\"]")
+                        ?.querySelector("[class*=\"_partno\"]")
+                        ?.innerText?.trim();
                     const button = document.createElement("button");
                     button.innerText = td.innerText;
                     button.title = "Sök på Bildelsbasen (Ny flik)";
@@ -164,38 +117,41 @@
                 }
             });
         };
-        const observer = new MutationObserver((mutationsList) =>
+
+        const observeLoadAnimation = () => 
         {
-            mutationsList.forEach((mutation) =>
+            const loadAnimation = document.querySelector("div.p5_load_animation.flex_center");
+            if (!loadAnimation) return;
+            const observer = new MutationObserver((mutations) => 
             {
-                if (mutation.type === "childList" && document.querySelector("#partinfoDialog > div.blockUI.blockOverlay"))
+                for (const { type, addedNodes } of mutations) 
                 {
-                    const intervalId = setInterval(() =>
+                    if (type === "childList" && addedNodes.length) 
                     {
-                        const partinfoTable = document.querySelector("#partinfoMainTable tbody");
-                        if (partinfoTable && partinfoTable.childElementCount > 0)
+                        const intervalId = setInterval(() => 
                         {
-                            clearInterval(intervalId);
-                            runCode();
-                        }
-                    }, 75);
+                            if (document.querySelector("[id*='_c0']>*") && (clearInterval(intervalId), runCode(), true)) return;
+                        }, 50);
+                    }
                 }
             });
-        });
-        observer.observe(targetNode,
-            {
-                childList: true
-            });
+            observer.observe(loadAnimation, { childList: true });
+        };
+          
+        observeLoadAnimation();
+        targetNode.addEventListener("DOMNodeInserted", observeLoadAnimation);
     }
 
     // Gör om PC-nummer i rutorna som öppnas till knappar som kopierar numret åt användaren
 
-    if (document.querySelector("#partinfoDialog"))
+    if (document.querySelector("#content"))
     {
-        const targetNode = document.querySelector("#partinfoDialog");
+        const targetNode = document.querySelector("#content");
         const runCode = () =>
         {
-            const partnoTds = document.querySelectorAll("#partinfoForm td.partinfoPartnoCol");
+            const partnoTds = [...document.querySelectorAll("[class*=acc][class*=p5t][class*=partno]")]
+                .flatMap(div => div.className.endsWith("_acc") ? [] : [div])
+                .sort((a, b) => a.className > b.className ? 1 : -1);
             partnoTds.forEach(td =>
             {
                 if (td.innerText.trim() === "")
@@ -261,128 +217,61 @@
             });
         };
 
-        new MutationObserver(mutationsList =>
+        const observeLoadAnimation = () => 
         {
-            mutationsList.forEach(mutation =>
+            const loadAnimation = document.querySelector("div.p5_load_animation.flex_center");
+            if (!loadAnimation) return;
+            const observer = new MutationObserver((mutations) => 
             {
-                if (mutation.type === "childList" && document.querySelector("#partinfoDialog > div.blockUI.blockOverlay"))
+                for (const { type, addedNodes } of mutations) 
                 {
-                    const intervalId = setInterval(() =>
+                    if (type === "childList" && addedNodes.length) 
                     {
-                        const partinfoTable = document.querySelector("#partinfoMainTable tbody");
-                        if (partinfoTable && partinfoTable.childElementCount > 0)
+                        const intervalId = setInterval(() => 
                         {
-                            clearInterval(intervalId);
-                            runCode();
-                        }
-                    }, 75);
+                            if (document.querySelector("[id*='_c0']>*") && (clearInterval(intervalId), runCode(), true)) return;
+                        }, 50);
+                    }
                 }
             });
-        })
-            .observe(targetNode,
-                {
-                    childList: true
-                });
+            observer.observe(loadAnimation, { childList: true });
+        };
+      
+        observeLoadAnimation();
+        targetNode.addEventListener("DOMNodeInserted", observeLoadAnimation);
     }
 
     // Ändrar färgen på 'Nummerändring' så att risken att man missar det är lägre
 
-    if (document.querySelector("#partinfoDialog"))
+    if (document.querySelector("#content"))
     {
-        const supersessionElement = document.querySelector("#partinfoSupersession");
-        const headlineElement = document.querySelector("#partinfoSupersessionHeadline");
-        const observer = new MutationObserver(mutations =>
+        const targetNode = document.querySelector("#content");
+        const observeLoadAnimation = () => 
         {
-            mutations.forEach(mutation =>
+            const loadAnimation = document.querySelector("div.p5_load_animation.flex_center");
+            if (!loadAnimation) return;
+            const observer = new MutationObserver((mutations) => 
             {
-                if (mutation.attributeName === "style" && supersessionElement.style.display === "block")
+                for (const { type, addedNodes } of mutations) 
                 {
-                    headlineElement.style.backgroundImage = "linear-gradient(to right, #ff6a2b, #f7c400)";
+                    if (type === "childList" && addedNodes.length) 
+                    {
+                        const p5AccHeaderTitle = document.querySelector("#content [class*=\"p5_accordion_header_title\"]");
+                        if (p5AccHeaderTitle)
+                        {
+                            const p5AccHeader = document.querySelector("#content [class*=\"p5_accordion_header\"]");
+                            if (p5AccHeader) 
+                            {
+                                p5AccHeader.style.backgroundImage = "linear-gradient(to right, #ff6a2b, #f7c400)";
+                            }
+                        }
+                    }
                 }
             });
-        });
-        observer.observe(supersessionElement,
-            {
-                attributes: true
-            });
-    }
-
-    // Skapar en knapp så att man kan ladda ner illustrationen som är framme
-
-    if (document.querySelector("#illustration-imageview-container"))
-    {
-        const illustrationButtons = document.getElementById("illustration-buttons");
-
-        const newTdElement = document.createElement("td");
-        newTdElement.classList.add("illuBtn");
-
-        const newAElement = document.createElement("a");
-        newAElement.id = "new-btn";
-        newAElement.classList.add("toolbarBtn", "toolbarBtnActive");
-        newAElement.href = "#";
-        newAElement.tabIndex = "-1";
-        newAElement.title = "Ladda ner illustration (PNG)";
-
-        const newSvgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        newSvgElement.setAttribute("viewBox", "0 0 121 123");
-        newSvgElement.setAttribute("fill", "#fff");
-        newSvgElement.innerHTML = "<path d=\"M0 0h121v94H88V84h22V10H11v74h21v10H0V0zm52 101V84h17v17h12l-21 22-20-22zM34 25a8 8 0 11-8 8 8 8 0 018-8zm33 34 16-28 16 43H22v-6h6l7-16 3 12h10l8-22 11 17z\"/>";
-        Object.assign(newSvgElement.style,
-            {
-                width: "100%",
-                height: "80%",
-                maxWidth: "100%",
-                maxHeight: "100%"
-            });
-        newAElement.appendChild(newSvgElement);
-
-        Object.assign(newAElement.style,
-            {
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: "transparent"
-            });
-
-        newAElement.addEventListener("mouseover", () =>
-        {
-            newAElement.style.backgroundColor = "#9a9b9d";
-        });
-
-        newAElement.addEventListener("mouseout", () =>
-        {
-            newAElement.style.backgroundColor = "transparent";
-        });
-
-        newTdElement.appendChild(newAElement);
-
-        const trimTdElement = illustrationButtons.querySelector(".trim");
-        trimTdElement.parentNode.insertBefore(newTdElement, trimTdElement);
-
-        const downloadBtn = document.getElementById("new-btn");
-        downloadBtn.addEventListener("click", () =>
-        {
-            ImageView.sendMessage("FitToWindow", null);
-
-            const mainImage = document.querySelector("#MainImage");
-            const imageSrc = mainImage.getAttribute("src");
-
-            const bboxRegex = /&bbox=[^&]*?(\d+)%2C(\d+)%2C(\d+)%2C(\d+)/;
-            const bboxMatch = imageSrc.match(bboxRegex);
-            const [, , , width, height] = bboxMatch;
-
-            const modifiedImageSrc = imageSrc
-                .replace(/(&bbox=[^&]*?)0*\d{1,3}(?=[^&]*?(&|$))/, "$10")
-                .replace(/&width=[^&]*/, "&width=" + width)
-                .replace(/&height=[^&]*/, "&height=" + height)
-                .replace(/&scalefac=[^&]*/, "&scalefac=1");
-
-            const link = document.createElement("a");
-            const [, , , number] = modifiedImageSrc.split("?path=")[1].split("&")[0].split("/");
-            const filename = `dacia_${number}`;
-            link.download = filename;
-            link.href = modifiedImageSrc;
-            link.click();
-        });
+            observer.observe(loadAnimation, { childList: true });
+        };
+      
+        observeLoadAnimation();
+        targetNode.addEventListener("DOMNodeInserted", observeLoadAnimation);
     }
 })();
