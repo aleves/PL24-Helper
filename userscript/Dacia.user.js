@@ -3,10 +3,10 @@
 // ==UserScript==
 // @name         PL24 Helper - Dacia
 // @namespace    Violentmonkey Scripts
-// @version      2.00
+// @version      2.01
 // @description  PL24 Helper - Dacia
 // @author       aleves
-// @match        https://www.partslink24.com/p5/latest/p5.html#%2Fp5renault~dacia_parts*
+// @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5renault~dacia_parts*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=partslink24.com
 // @grant        none
 // ==/UserScript==
@@ -118,17 +118,17 @@
             });
         };
 
-        const observeLoadAnimation = () => 
+        const observeLoadAnimation = () =>
         {
             const loadAnimation = document.querySelector("div.p5_load_animation.flex_center");
             if (!loadAnimation) return;
-            const observer = new MutationObserver((mutations) => 
+            const observer = new MutationObserver((mutations) =>
             {
-                for (const { type, addedNodes } of mutations) 
+                for (const { type, addedNodes } of mutations)
                 {
-                    if (type === "childList" && addedNodes.length) 
+                    if (type === "childList" && addedNodes.length)
                     {
-                        const intervalId = setInterval(() => 
+                        const intervalId = setInterval(() =>
                         {
                             if (document.querySelector("[id*='_c0']>*") && (clearInterval(intervalId), runCode(), true)) return;
                         }, 50);
@@ -137,7 +137,7 @@
             });
             observer.observe(loadAnimation, { childList: true });
         };
-          
+
         observeLoadAnimation();
         targetNode.addEventListener("DOMNodeInserted", observeLoadAnimation);
     }
@@ -217,17 +217,17 @@
             });
         };
 
-        const observeLoadAnimation = () => 
+        const observeLoadAnimation = () =>
         {
             const loadAnimation = document.querySelector("div.p5_load_animation.flex_center");
             if (!loadAnimation) return;
-            const observer = new MutationObserver((mutations) => 
+            const observer = new MutationObserver((mutations) =>
             {
-                for (const { type, addedNodes } of mutations) 
+                for (const { type, addedNodes } of mutations)
                 {
-                    if (type === "childList" && addedNodes.length) 
+                    if (type === "childList" && addedNodes.length)
                     {
-                        const intervalId = setInterval(() => 
+                        const intervalId = setInterval(() =>
                         {
                             if (document.querySelector("[id*='_c0']>*") && (clearInterval(intervalId), runCode(), true)) return;
                         }, 50);
@@ -236,7 +236,7 @@
             });
             observer.observe(loadAnimation, { childList: true });
         };
-      
+
         observeLoadAnimation();
         targetNode.addEventListener("DOMNodeInserted", observeLoadAnimation);
     }
@@ -246,21 +246,21 @@
     if (document.querySelector("#content"))
     {
         const targetNode = document.querySelector("#content");
-        const observeLoadAnimation = () => 
+        const observeLoadAnimation = () =>
         {
             const loadAnimation = document.querySelector("div.p5_load_animation.flex_center");
             if (!loadAnimation) return;
-            const observer = new MutationObserver((mutations) => 
+            const observer = new MutationObserver((mutations) =>
             {
-                for (const { type, addedNodes } of mutations) 
+                for (const { type, addedNodes } of mutations)
                 {
-                    if (type === "childList" && addedNodes.length) 
+                    if (type === "childList" && addedNodes.length)
                     {
                         const p5AccHeaderTitle = document.querySelector("#content [class*=\"p5_accordion_header_title\"]");
                         if (p5AccHeaderTitle)
                         {
                             const p5AccHeader = document.querySelector("#content [class*=\"p5_accordion_header\"]");
-                            if (p5AccHeader) 
+                            if (p5AccHeader)
                             {
                                 p5AccHeader.style.backgroundImage = "linear-gradient(to right, #ff6a2b, #f7c400)";
                             }
@@ -270,7 +270,7 @@
             });
             observer.observe(loadAnimation, { childList: true });
         };
-      
+
         observeLoadAnimation();
         targetNode.addEventListener("DOMNodeInserted", observeLoadAnimation);
     }

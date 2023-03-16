@@ -1,13 +1,12 @@
 /* eslint-disable no-control-regex */
 /* eslint-disable no-undef */
 // ==UserScript==
-// @name         PL24 Helper - Renault
+// @name         PL24 Helper - Audi
 // @namespace    Violentmonkey Scripts
-// @version      2.01
-// @description  PL24 Helper - Renault
+// @version      1.00
+// @description  PL24 Helper - Audi
 // @author       aleves
-// @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5renault~renault_parts*
-// @exclude      https://www.partslink24.com/p5/*/p5.html#%2Fp5renault~dacia_parts*
+// @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5vwag~audi_parts*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=partslink24.com
 // @grant        none
 // ==/UserScript==
@@ -24,18 +23,21 @@
     // Logotyp för att indikera att skriptet är igång
 
     const logoDiv = document.createElement("div");
-    logoDiv.textContent = "PL24 Helper - Renault";
+    logoDiv.textContent = "PL24 Helper - Audi";
     Object.assign(logoDiv.style, {
-        display: "inline-block",
+        display: "flex",
         fontFamily: "Arial, sans-serif",
-        fontSize: "14px",
+        fontSize: ".875rem",
         fontWeight: "bold",
         color: "#ffffff",
         background: "linear-gradient(to top right, #009f70, #bbcf00)",
         padding: "5px 10px",
         borderRadius: "8px",
         position: "relative",
-        right: "2rem",
+        right: "-2rem",
+        height: "1.875rem",
+        top: "1.75rem",
+        ["align-items"]: "center",
         zIndex: "666"
     });
 
@@ -86,7 +88,7 @@
                 {
                     const partNumber = td.closest("[id*=\"_c\"]")
                         .querySelector("[class*=\"_partno\"]")
-                        .innerText.trim();
+                        .innerText.trim().replace("* ", "").replace(/\s+/g, " ");
                     const button = document.createElement("button");
                     button.innerText = td.innerText;
                     button.title = "Sök på Bildelsbasen (Ny flik)";
@@ -121,7 +123,7 @@
 
         const observeLoadAnimation = () =>
         {
-            const loadAnimation = document.querySelector("div.p5_load_animation.flex_center");
+            const loadAnimation = document.querySelector("div.p5_animation");
             if (!loadAnimation) return;
             const observer = new MutationObserver((mutations) =>
             {
@@ -165,7 +167,7 @@
                 btn.title = "Kopiera nummer";
                 btn.addEventListener("click", event =>
                 {
-                    navigator.clipboard.writeText(td.innerText.trim());
+                    navigator.clipboard.writeText(td.innerText.trim().replace("* ", "").replace(/\s+/g, " "));
                     const notification = document.createElement("div");
                     notification.innerText = "Kopierad!";
                     Object.assign(notification.style,
@@ -220,7 +222,7 @@
 
         const observeLoadAnimation = () =>
         {
-            const loadAnimation = document.querySelector("div.p5_load_animation.flex_center");
+            const loadAnimation = document.querySelector("div.p5_animation");
             if (!loadAnimation) return;
             const observer = new MutationObserver((mutations) =>
             {
@@ -249,7 +251,7 @@
         const targetNode = document.querySelector("#content");
         const observeLoadAnimation = () =>
         {
-            const loadAnimation = document.querySelector("div.p5_load_animation.flex_center");
+            const loadAnimation = document.querySelector("div.p5_animation");
             if (!loadAnimation) return;
             const observer = new MutationObserver((mutations) =>
             {
@@ -257,10 +259,10 @@
                 {
                     if (type === "childList" && addedNodes.length)
                     {
-                        const p5AccHeaderTitle = document.querySelector("#content [class*=\"p5_accordion_header_title\"]");
+                        const p5AccHeaderTitle = document.querySelector("#content [class*=\"p5_akkordeon_header_title\"]");
                         if (p5AccHeaderTitle)
                         {
-                            const p5AccHeader = document.querySelector("#content [class*=\"p5_accordion_header\"]");
+                            const p5AccHeader = document.querySelector("#content [class*=\"p5_akkordeon_header\"]");
                             if (p5AccHeader)
                             {
                                 p5AccHeader.style.backgroundImage = "linear-gradient(to right, #ff6a2b, #f7c400)";
