@@ -1,12 +1,12 @@
 /* eslint-disable no-control-regex */
 /* eslint-disable no-undef */
 // ==UserScript==
-// @name         PL24 Helper - Cupra
+// @name         PL24 Helper - Smart
 // @namespace    Violentmonkey Scripts
 // @version      2.02
-// @description  PL24 Helper - Cupra
+// @description  PL24 Helper - Smart
 // @author       aleves
-// @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5vwag~cupra_parts*
+// @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5daimler~smart_parts*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=partslink24.com
 // @grant        none
 // ==/UserScript==
@@ -23,7 +23,7 @@
     // Logotyp för att indikera att skriptet är igång
 
     const logoDiv = document.createElement("div");
-    logoDiv.textContent = "PL24 Helper - Cupra";
+    logoDiv.textContent = "PL24 Helper - Smart";
     Object.assign(logoDiv.style, {
         display: "flex",
         fontFamily: "Arial, sans-serif",

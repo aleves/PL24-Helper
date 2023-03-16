@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - MINI
 // @namespace    Violentmonkey Scripts
-// @version      1.00
+// @version      2.02
 // @description  PL24 Helper - MINI
 // @author       aleves
 // @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5bmw~mini_parts*
@@ -31,6 +31,7 @@
         fontSize: ".875rem",
         fontWeight: "bold",
         color: "#ffffff",
+        ["text-shadow"]: "-1px 1px .25px rgba(0, 0, 0, 0.67), -1px 0 .25px rgba(0, 0, 0, 0.67)",
         background: "linear-gradient(to top right, #009f70, #bbcf00)",
         padding: "5px 10px",
         borderRadius: "8px",
@@ -260,13 +261,18 @@
                 {
                     if (type === "childList" && addedNodes.length)
                     {
-                        const p5AccHeaderTitle = document.querySelector("#content [class*=\"p5_akkordeon_header_title\"]");
-                        if (p5AccHeaderTitle)
+                        const p5AccHeaderTitles = document.querySelectorAll("#content [class*=\"p5_akkordeon_header\"]");
+                        for (const title of p5AccHeaderTitles)
                         {
-                            const p5AccHeader = document.querySelector("#content [class*=\"p5_akkordeon_header\"]");
-                            if (p5AccHeader)
+                            if (title.textContent.trim() === "Nummerändring")
                             {
-                                p5AccHeader.style.backgroundImage = "linear-gradient(to right, #ff6a2b, #f7c400)";
+                                const p5AccHeader = title.closest("[class*=\"p5_akkordeon\"]");
+                                if (p5AccHeader) p5AccHeader.style.backgroundImage = "linear-gradient(to right, #ff6a2b, #f7c400)";
+                            }
+                            if (title.textContent.trim() === "Bytesartikel")
+                            {
+                                const p5AccHeader = title.closest("[class*=\"p5_akkordeon\"]");
+                                if (p5AccHeader) p5AccHeader.style.backgroundImage = "linear-gradient(to right, #ffa078, #ffd845)";
                             }
                         }
                     }
@@ -274,7 +280,6 @@
             });
             observer.observe(loadAnimation, { childList: true });
         };
-
         observeLoadAnimation();
         targetNode.addEventListener("DOMNodeInserted", observeLoadAnimation);
     }
