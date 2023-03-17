@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Alpine
 // @namespace    Violentmonkey Scripts
-// @version      2.02
+// @version      2.03
 // @description  PL24 Helper - Alpine
 // @author       aleves
 // @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5renault~alpine_parts*
@@ -23,7 +23,7 @@
     // Logotyp för att indikera att skriptet är igång
 
     const logoDiv = document.createElement("div");
-    logoDiv.textContent = "PL24 Helper - Alpine";
+    logoDiv.textContent = "PL24 Helper - Alpine (Hej!)";
     Object.assign(logoDiv.style, {
         display: "inline-block",
         fontFamily: "Arial, sans-serif",
