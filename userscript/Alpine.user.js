@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Alpine
 // @namespace    Violentmonkey Scripts
-// @version      2.02
+// @version      2.04
 // @description  PL24 Helper - Alpine
 // @author       aleves
 // @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5renault~alpine_parts*
