@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Jaguar
 // @namespace    Violentmonkey Scripts
-// @version      2.03
+// @version      2.04
 // @description  PL24 Helper - Jaguar
 // @author       aleves
 // @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5jlr~jaguar_parts*
@@ -134,7 +134,7 @@
                     {
                         const intervalId = setInterval(() =>
                         {
-                            if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr])>*") && (clearInterval(intervalId), runCode(), true)) return;
+                            if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr]):not([id*=searchresult])>*") && (clearInterval(intervalId), runCode(), true)) return;
                         }, 50);
                     }
                 }
@@ -233,7 +233,7 @@
                     {
                         const intervalId = setInterval(() =>
                         {
-                            if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr])>*") && (clearInterval(intervalId), runCode(), true)) return;
+                            if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr]):not([id*=searchresult])>*") && (clearInterval(intervalId), runCode(), true)) return;
                         }, 50);
                     }
                 }
