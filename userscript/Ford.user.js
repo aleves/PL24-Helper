@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Ford
 // @namespace    Violentmonkey Scripts
-// @version      1.00
+// @version      1.01
 // @description  PL24 Helper - Ford
 // @author       aleves
 // @match        https://www.partslink24.com/ford/fordp_parts/*
@@ -264,19 +264,16 @@
     if (document.querySelector("#partin4content"))
     {
         const partin4content = document.querySelector("#partin4content");
-        const observer = new MutationObserver(() => 
+        const observer = new MutationObserver(() =>
         {
-            const partin4TabSupersessionsLink = document.querySelector("#partin4Tab-reman > a");
-            if (partin4TabSupersessionsLink && partin4TabSupersessionsLink.getAttribute("href") === "#partin4TabDiv-reman") 
+            const partin4TabRemanLink = document.querySelector("#partin4Tab-reman > a");
+            const partin4TabSupersessionsLink = document.querySelector("#partin4Tab-supersessions > a");
+            if ((partin4TabRemanLink && partin4TabRemanLink.getAttribute("href") === "#partin4TabDiv-reman")
+            || (partin4TabSupersessionsLink && partin4TabSupersessionsLink.getAttribute("href") === "#partin4TabDiv-supersessions"))
             {
-                const partInfoTabsUl = document.querySelector("#partInfoTabs > ul");
-                if (partInfoTabsUl) 
-                {
-                    partInfoTabsUl.style.backgroundImage = "linear-gradient(to right, #ff6a2b, #f7c400)";
-                }
+                document.querySelector("#partInfoTabs > ul").style.backgroundImage = "linear-gradient(to right, #ff6a2b, #f7c400)";
             }
         });
-
         observer.observe(partin4content, { childList: true });
     }
 
