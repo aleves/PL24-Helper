@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Ford
 // @namespace    Violentmonkey Scripts
-// @version      1.01
+// @version      1.02
 // @description  PL24 Helper - Ford
 // @author       aleves
 // @match        https://www.partslink24.com/ford/fordp_parts/*
@@ -37,6 +37,56 @@
         });
     document.querySelector("#linksAndBreadCrumbs")
         .appendChild(logoDiv);
+
+    // Lägger till en testsök-knapp för att lägga till bindestreck och se om det kan ge bättre sökning
+
+    const searchTermInput = document.querySelector("#searchTerm");
+    const newButton = document.createElement("button");
+    newButton.textContent = "Testsök";
+    newButton.title = "Provar att lägga till bindestreck i PC-numret (Minst 7 tecken i fältet)"
+    Object.assign(newButton.style, {
+        backgroundColor: "#808285",
+        color: "#fff",
+        border: "0 none",
+        cursor: "pointer",
+        fontSize: "12px",
+        fontWeight: "bold",
+        height: "22px",
+        margin: "0 3px",
+        textTransform: "uppercase",
+        verticalAlign: "middle",
+        padding: "0 3px"
+    });
+
+    function updateButtonState()
+    {
+        const inputValue = searchTermInput.value;
+        const hyphenCount = (inputValue.match(/-/g) || []).length;
+        setTimeout(() =>
+        {
+            newButton.disabled = inputValue.length < 7 || hyphenCount >= 2;
+            Object.assign(newButton.style, {
+                backgroundColor: newButton.disabled ? "#d3d3d3" : "#808285",
+                cursor: newButton.disabled ? "default" : "pointer"
+            });
+        }, 125);
+    }
+
+    searchTermInput.addEventListener("input", updateButtonState);
+
+    newButton.addEventListener("click", () =>
+    {
+        const inputValue = searchTermInput.value.replaceAll("-", "");
+        if (inputValue.length >= 7 && !inputValue.includes("-"))
+        {
+            searchTermInput.value = `${inputValue.slice(0, 4)}-${inputValue.slice(4, -2)}-${inputValue.slice(-2)}`;
+        }
+        updateButtonState();
+    });
+
+    updateButtonState();
+
+    document.querySelector("#searchForm tr").appendChild(newButton);
 
     // Scrollhjulet kan zooma illustrationen in och ut
 
