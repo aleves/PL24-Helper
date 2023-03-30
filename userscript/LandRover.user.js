@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Land Rover
 // @namespace    Violentmonkey Scripts
-// @version      2.04
+// @version      2.05
 // @description  PL24 Helper - Land Rover
 // @author       aleves
 // @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5jlr~landrover_parts*
@@ -57,6 +57,31 @@
     });
 
     observer.observe(document.querySelector("#dealer_header_container"), { childList: true });
+
+    // Tar bort mellanslag inuti sökrutan
+
+    if (document.querySelector("#search_query"))
+    {
+        const searchInput = document.querySelector("#search_query");
+        const searchIcon = document.querySelector("#search_icon");
+        const removeWhitespace = (value) =>
+            value.replace(/\s/g, "");
+
+        searchInput.addEventListener("keydown", (event) =>
+        {
+            if (event.key === "Enter")
+            {
+                event.preventDefault();
+                searchInput.value = removeWhitespace(searchInput.value);
+            }
+        });
+
+        searchIcon.addEventListener("mousedown", (event) =>
+        {
+            event.preventDefault();
+            searchInput.value = removeWhitespace(searchInput.value);
+        });
+    }
 
     // Om ett cirkapris saknas skapas en knapp för att söka direkt på Bildelsbasen (öppnas i ny flik)
 
