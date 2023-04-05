@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Dacia
 // @namespace    Violentmonkey Scripts
-// @version      2.05
+// @version      2.06
 // @description  PL24 Helper - Dacia
 // @author       aleves
 // @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5renault~dacia_parts*
@@ -90,9 +90,7 @@
             const existingNewPrices = document.querySelectorAll("[id*=\"_c\"] [class*=\"_price\"] span.new-price");
             if (existingNewPrices.length > 0) return;
 
-            const priceTds = [...document.querySelectorAll("[class*=acc][class*=p5t][class*=price]")]
-                .flatMap(div => div.className.endsWith("_acc") ? [] : [div])
-                .sort((a, b) => a.className > b.className ? 1 : -1);
+            const priceTds = [...document.querySelectorAll("[class*=acc][class*=p5t][class*=price] span.p5_cell_content_vert_middle")]
             priceTds.forEach((td) =>
             {
                 const priceText = td.innerText.trim()
@@ -156,7 +154,7 @@
                     {
                         const intervalId = setInterval(() =>
                         {
-                            if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr]):not([id*=searchresult])>*") && (clearInterval(intervalId), runCode(), true)) return;
+                            if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr]):not([id*=searchresult]):not([id*=vinfoEquipment]):not([id*=vinfoVDP])>*") && (clearInterval(intervalId), runCode(), true)) return;
                         }, 50);
                     }
                 }
@@ -255,7 +253,7 @@
                     {
                         const intervalId = setInterval(() =>
                         {
-                            if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr]):not([id*=searchresult])>*") && (clearInterval(intervalId), runCode(), true)) return;
+                            if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr]):not([id*=searchresult]):not([id*=vinfoEquipment]):not([id*=vinfoVDP])>*") && (clearInterval(intervalId), runCode(), true)) return;
                         }, 50);
                     }
                 }

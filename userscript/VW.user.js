@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Volkswagen
 // @namespace    Violentmonkey Scripts
-// @version      2.05
+// @version      2.06
 // @description  PL24 Helper - Volkswagen
 // @author       aleves
 // @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5vwag~vw_parts*
@@ -27,9 +27,9 @@
     const logoDiv = document.createElement("div");
     logoDiv.textContent = "PL24 Helper - Volkswagen";
     Object.assign(logoDiv.style, {
-        display: "flex",
+        display: "inline-block",
         fontFamily: "Arial, sans-serif",
-        fontSize: ".875rem",
+        fontSize: "14px",
         fontWeight: "bold",
         color: "#ffffff",
         ["text-shadow"]: "-1px 1px .25px rgba(0, 0, 0, 0.67), -1px 0 .25px rgba(0, 0, 0, 0.67)",
@@ -37,10 +37,7 @@
         padding: "5px 10px",
         borderRadius: "8px",
         position: "relative",
-        right: "-1rem",
-        height: "1.875rem",
-        top: "1.75rem",
-        ["align-items"]: "center",
+        right: "1rem",
         zIndex: "666"
     });
 
@@ -95,9 +92,7 @@
             const existingNewPrices = document.querySelectorAll("[id*=\"_c\"] [class*=\"_price\"] span.new-price");
             if (existingNewPrices.length > 0) return;
 
-            const priceTds = [...document.querySelectorAll("[class*=acc][class*=p5t][class*=price]")]
-                .flatMap(div => div.className.endsWith("_acc") ? [] : [div])
-                .sort((a, b) => a.className > b.className ? 1 : -1);
+            const priceTds = [...document.querySelectorAll("[class*=acc][class*=p5t][class*=price] span.p5_cell_content_vert_middle")]
             priceTds.forEach((td) =>
             {
                 const priceText = td.innerText.trim()
@@ -151,7 +146,7 @@
 
         const observeLoadAnimation = () =>
         {
-            const loadAnimation = document.querySelector("div.p5_animation");
+            const loadAnimation = document.querySelector("div.p5_load_animation");
             if (!loadAnimation) return;
             const observer = new MutationObserver((mutations) =>
             {
@@ -161,7 +156,7 @@
                     {
                         const intervalId = setInterval(() =>
                         {
-                            if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr]):not([id*=searchresult])>*") && (clearInterval(intervalId), runCode(), true)) return;
+                            if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr]):not([id*=searchresult]):not([id*=vinfoEquipment]):not([id*=vinfoVDP])>*") && (clearInterval(intervalId), runCode(), true)) return;
                         }, 50);
                     }
                 }
@@ -250,7 +245,7 @@
 
         const observeLoadAnimation = () =>
         {
-            const loadAnimation = document.querySelector("div.p5_animation");
+            const loadAnimation = document.querySelector("div.p5_load_animation");
             if (!loadAnimation) return;
             const observer = new MutationObserver((mutations) =>
             {
@@ -260,7 +255,7 @@
                     {
                         const intervalId = setInterval(() =>
                         {
-                            if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr]):not([id*=searchresult])>*") && (clearInterval(intervalId), runCode(), true)) return;
+                            if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr]):not([id*=searchresult]):not([id*=vinfoEquipment]):not([id*=vinfoVDP])>*") && (clearInterval(intervalId), runCode(), true)) return;
                         }, 50);
                     }
                 }
@@ -276,10 +271,11 @@
 
     if (document.querySelector("#content"))
     {
+        console.warn("hi0")
         const targetNode = document.querySelector("#content");
         const observeLoadAnimation = () =>
         {
-            const loadAnimation = document.querySelector("div.p5_animation");
+            const loadAnimation = document.querySelector("div.p5_load_animation");
             if (!loadAnimation) return;
             const observer = new MutationObserver((mutations) =>
             {
@@ -287,17 +283,19 @@
                 {
                     if (type === "childList" && addedNodes.length)
                     {
-                        const p5AccHeaderTitles = document.querySelectorAll("#content [class*=\"p5_akkordeon_header\"]");
+                        console.warn("hi1")
+                        const p5AccHeaderTitles = document.querySelectorAll("#content [class*=\"p5_accordion_header\"]");
                         for (const title of p5AccHeaderTitles)
                         {
+                            console.warn("hi2")
                             if (title.textContent.trim() === "Nummerändring")
                             {
-                                const p5AccHeader = title.closest("[class*=\"p5_akkordeon\"]");
+                                const p5AccHeader = title.closest("[class*=\"p5_accordion\"]");
                                 if (p5AccHeader) p5AccHeader.style.backgroundImage = "linear-gradient(to right, #ff6a2b, #f7c400)";
                             }
                             if (title.textContent.trim() === "Bytesartikel")
                             {
-                                const p5AccHeader = title.closest("[class*=\"p5_akkordeon\"]");
+                                const p5AccHeader = title.closest("[class*=\"p5_accordion\"]");
                                 if (p5AccHeader) p5AccHeader.style.backgroundImage = "linear-gradient(to right, #ffa078, #ffd845)";
                             }
                         }
