@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Ford
 // @namespace    Violentmonkey Scripts
-// @version      1.03
+// @version      1.04
 // @description  PL24 Helper - Ford
 // @author       aleves
 // @match        https://www.partslink24.com/ford/fordp_parts/*
@@ -259,7 +259,7 @@
                 });
     }
 
-    //
+    // Skapar knappar som kopierar artikelnummer utanför dialogrutorna
 
     if (document.querySelector("#nav-bomDetails-container"))
     {
@@ -277,21 +277,20 @@
                 const btn = document.createElement("button");
                 btn.innerText = td.innerText;
                 btn.title = "Vänsterklick = Kopiera nummer\nHögerklick = Kopiera nummer utan bindestreck";
-                btn.addEventListener("contextmenu", event =>
-                {
-                    event.preventDefault();
-                    event.stopPropagation();
-                });
                 btn.addEventListener("mouseup", (event) =>
                 {
                     let notificationText = "";
                     const partno = td.innerText.trim();
                     if (event.button === 2)
                     {
-                        // Remove "-" characters if right mouse button was clicked
                         const cleanedPartno = partno.replace(/-/g, "");
                         navigator.clipboard.writeText(cleanedPartno);
                         notificationText = "Kopierad utan bindestreck!";
+                        btn.addEventListener("contextmenu", event =>
+                        {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        });
                     }
                     else
                     {
