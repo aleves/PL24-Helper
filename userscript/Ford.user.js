@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Ford
 // @namespace    Violentmonkey Scripts
-// @version      1.02
+// @version      1.03
 // @description  PL24 Helper - Ford
 // @author       aleves
 // @match        https://www.partslink24.com/ford/fordp_parts/*
@@ -37,56 +37,6 @@
         });
     document.querySelector("#linksAndBreadCrumbs")
         .appendChild(logoDiv);
-
-    // Lägger till en testsök-knapp för att lägga till bindestreck och se om det kan ge bättre sökning
-
-    const searchTermInput = document.querySelector("#searchTerm");
-    const newButton = document.createElement("button");
-    newButton.textContent = "Testsök";
-    newButton.title = "Provar att lägga till bindestreck i PC-numret (Minst 7 tecken i fältet)"
-    Object.assign(newButton.style, {
-        backgroundColor: "#808285",
-        color: "#fff",
-        border: "0 none",
-        cursor: "pointer",
-        fontSize: "12px",
-        fontWeight: "bold",
-        height: "22px",
-        margin: "0 3px",
-        textTransform: "uppercase",
-        verticalAlign: "middle",
-        padding: "0 3px"
-    });
-
-    function updateButtonState()
-    {
-        const inputValue = searchTermInput.value;
-        const hyphenCount = (inputValue.match(/-/g) || []).length;
-        setTimeout(() =>
-        {
-            newButton.disabled = inputValue.length < 7 || hyphenCount >= 2;
-            Object.assign(newButton.style, {
-                backgroundColor: newButton.disabled ? "#d3d3d3" : "#808285",
-                cursor: newButton.disabled ? "default" : "pointer"
-            });
-        }, 125);
-    }
-
-    searchTermInput.addEventListener("input", updateButtonState);
-
-    newButton.addEventListener("click", () =>
-    {
-        const inputValue = searchTermInput.value.replaceAll("-", "");
-        if (inputValue.length >= 7 && !inputValue.includes("-"))
-        {
-            searchTermInput.value = `${inputValue.slice(0, 4)}-${inputValue.slice(4, -2)}-${inputValue.slice(-2)}`;
-        }
-        updateButtonState();
-    });
-
-    updateButtonState();
-
-    document.querySelector("#searchForm tr").appendChild(newButton);
 
     // Scrollhjulet kan zooma illustrationen in och ut
 
@@ -309,6 +259,115 @@
                 });
     }
 
+    //
+
+    if (document.querySelector("#nav-bomDetails-container"))
+    {
+        const targetNode = document.querySelector("#nav-bomDetails-container");
+        const runCode = () =>
+        {
+            const partnoTds = document.querySelectorAll("#nav-bomDetails-table tbody [class*='tc-mcell partno']");
+            partnoTds.forEach((td) =>
+            {
+                if (td.innerText.trim() === "")
+                {
+                    return;
+                }
+
+                const btn = document.createElement("button");
+                btn.innerText = td.innerText;
+                btn.title = "Vänsterklick = Kopiera nummer\nHögerklick = Kopiera nummer utan bindestreck";
+                btn.addEventListener("contextmenu", event =>
+                {
+                    event.preventDefault();
+                    event.stopPropagation();
+                });
+                btn.addEventListener("mouseup", (event) =>
+                {
+                    let notificationText = "";
+                    const partno = td.innerText.trim();
+                    if (event.button === 2)
+                    {
+                        // Remove "-" characters if right mouse button was clicked
+                        const cleanedPartno = partno.replace(/-/g, "");
+                        navigator.clipboard.writeText(cleanedPartno);
+                        notificationText = "Kopierad utan bindestreck!";
+                    }
+                    else
+                    {
+                        navigator.clipboard.writeText(partno);
+                        notificationText = "Kopierad!";
+                    }
+
+                    const notification = document.createElement("div");
+                    notification.innerText = notificationText;
+                    Object.assign(notification.style, {
+                        position: "absolute",
+                        top: `${event.pageY - 40}px`,
+                        left: `${event.pageX - 10}px`,
+                        backgroundColor: "rgba(255, 255, 255, 0.95)",
+                        border: "1px solid #cccccc",
+                        borderRadius: "5px",
+                        padding: "10px",
+                        fontWeight: "bold",
+                        color: "#333333",
+                        boxShadow: "0px 4px 16px rgba(0, 0, 0, 0.3)",
+                        zIndex: "9999",
+                        transition: "opacity 0.4s ease-out"
+                    });
+                    document.body.appendChild(notification);
+                    setTimeout(() =>
+                    {
+                        notification.style.opacity = 0;
+                        setTimeout(() =>
+                        {
+                            document.body.removeChild(notification);
+                        }, 200);
+                    }, 500);
+                    event.preventDefault();
+                    event.stopPropagation();
+                });
+                Object.assign(btn.style, {
+                    border: "1px solid white",
+                    borderRadius: "4px",
+                    backgroundColor: "#e0e7ff",
+                    color: "black",
+                    textTransform: "uppercase",
+                    verticalAlign: "top",
+                    cursor: "pointer",
+                    margin: "0 auto 0 auto",
+                    display: "block",
+                    width: "100%",
+                    boxSizing: "border-box",
+                    textAlign: "center"
+                });
+                td.innerText = "";
+                td.appendChild(btn);
+            });
+        };
+
+        new MutationObserver((mutationsList) =>
+        {
+            mutationsList.forEach((mutation) =>
+            {
+                if (mutation.type === "childList" && document.querySelector("#nav-bomDetails-container"))
+                {
+                    const intervalId = setInterval(() =>
+                    {
+                        const partinfoTable = document.querySelector("#nav-bomDetails-table tbody");
+                        if (partinfoTable && partinfoTable.childElementCount > 0)
+                        {
+                            clearInterval(intervalId);
+                            runCode();
+                        }
+                    }, 75);
+                }
+            });
+        }).observe(targetNode, {
+            childList: true
+        });
+    }
+
     // Ändrar färgen på 'Nummerändring' så att risken att man missar det är lägre
 
     if (document.querySelector("#partin4content"))
@@ -405,4 +464,58 @@
             link.click();
         });
     }
+
+    // Lägger till en testsök-knapp för att lägga till bindestreck och se om det kan ge bättre sökning
+
+    /*     var test = false
+    if (test)
+    {
+        const searchTermInput = document.querySelector("#searchTerm");
+        const newButton = document.createElement("button");
+        newButton.textContent = "Testsök";
+        newButton.title = "Provar att lägga till bindestreck i PC-numret (Minst 7 tecken i fältet)"
+        Object.assign(newButton.style, {
+            backgroundColor: "#808285",
+            color: "#fff",
+            border: "0 none",
+            cursor: "pointer",
+            fontSize: "12px",
+            fontWeight: "bold",
+            height: "22px",
+            margin: "0 3px",
+            textTransform: "uppercase",
+            verticalAlign: "middle",
+            padding: "0 3px"
+        });
+
+        function updateButtonState()
+        {
+            const inputValue = searchTermInput.value;
+            const hyphenCount = (inputValue.match(/-/g) || []).length;
+            setTimeout(() =>
+            {
+                newButton.disabled = inputValue.length < 7 || hyphenCount >= 2;
+                Object.assign(newButton.style, {
+                    backgroundColor: newButton.disabled ? "#d3d3d3" : "#808285",
+                    cursor: newButton.disabled ? "default" : "pointer"
+                });
+            }, 125);
+        }
+
+        searchTermInput.addEventListener("input", updateButtonState);
+
+        newButton.addEventListener("click", () =>
+        {
+            const inputValue = searchTermInput.value.replaceAll("-", "");
+            if (inputValue.length >= 7 && !inputValue.includes("-"))
+            {
+                searchTermInput.value = `${inputValue.slice(0, 4)}-${inputValue.slice(4, -2)}-${inputValue.slice(-2)}`;
+            }
+            updateButtonState();
+        });
+
+        updateButtonState();
+
+        document.querySelector("#searchForm tr").appendChild(newButton);
+    } */
 })();
