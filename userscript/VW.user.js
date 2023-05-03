@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Volkswagen
 // @namespace    Violentmonkey Scripts
-// @version      2.06
+// @version      2.07
 // @description  PL24 Helper - Volkswagen
 // @author       aleves
 // @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5vwag~vw_parts*
@@ -271,7 +271,6 @@
 
     if (document.querySelector("#content"))
     {
-        console.warn("hi0")
         const targetNode = document.querySelector("#content");
         const observeLoadAnimation = () =>
         {
@@ -283,11 +282,9 @@
                 {
                     if (type === "childList" && addedNodes.length)
                     {
-                        console.warn("hi1")
                         const p5AccHeaderTitles = document.querySelectorAll("#content [class*=\"p5_accordion_header\"]");
                         for (const title of p5AccHeaderTitles)
                         {
-                            console.warn("hi2")
                             if (title.textContent.trim() === "Nummerändring")
                             {
                                 const p5AccHeader = title.closest("[class*=\"p5_accordion\"]");
