@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Citroën
 // @namespace    Violentmonkey Scripts
-// @version      1.02
+// @version      1.03
 // @description  PL24 Helper - Citroën
 // @author       aleves
 // @match        https://www.partslink24.com/psa/citroen_parts/*
@@ -179,27 +179,44 @@
 
                 const btn = document.createElement("button");
                 btn.innerText = td.innerText;
-                btn.title = "Kopiera nummer";
-                btn.addEventListener("click", event =>
+                btn.title = "Vänsterklick = Kopiera nummer\nHögerklick = Kopiera nummer utan mellanslag";
+                btn.addEventListener("mouseup", (event) =>
                 {
-                    navigator.clipboard.writeText(td.innerText.trim());
-                    const notification = document.createElement("div");
-                    notification.innerText = "Kopierad!";
-                    Object.assign(notification.style,
+                    let notificationText = "";
+                    const partno = td.innerText.trim();
+                    if (event.button === 2)
+                    {
+                        const cleanedPartno = partno.replace(/\s/g, "");
+                        navigator.clipboard.writeText(cleanedPartno);
+                        notificationText = "Kopierad utan mellanslag!";
+                        btn.addEventListener("contextmenu", event =>
                         {
-                            position: "absolute",
-                            top: `${event.pageY - 40}px`,
-                            left: `${event.pageX - 10}px`,
-                            backgroundColor: "rgba(255, 255, 255, 0.95)",
-                            border: "1px solid #cccccc",
-                            borderRadius: "5px",
-                            padding: "10px",
-                            fontWeight: "bold",
-                            color: "#333333",
-                            boxShadow: "0px 4px 16px rgba(0, 0, 0, 0.3)",
-                            zIndex: "9999",
-                            transition: "opacity 0.4s ease-out"
+                            event.preventDefault();
+                            event.stopPropagation();
                         });
+                    }
+                    else
+                    {
+                        navigator.clipboard.writeText(partno);
+                        notificationText = "Kopierad!";
+                    }
+
+                    const notification = document.createElement("div");
+                    notification.innerText = notificationText;
+                    Object.assign(notification.style, {
+                        position: "absolute",
+                        top: `${event.pageY - 40}px`,
+                        left: `${event.pageX - 10}px`,
+                        backgroundColor: "rgba(255, 255, 255, 0.95)",
+                        border: "1px solid #cccccc",
+                        borderRadius: "5px",
+                        padding: "10px",
+                        fontWeight: "bold",
+                        color: "#333333",
+                        boxShadow: "0px 4px 16px rgba(0, 0, 0, 0.3)",
+                        zIndex: "9999",
+                        transition: "opacity 0.4s ease-out"
+                    });
                     document.body.appendChild(notification);
                     setTimeout(() =>
                     {
@@ -212,24 +229,23 @@
                     event.preventDefault();
                     event.stopPropagation();
                 });
-                Object.assign(btn.style,
-                    {
-                        padding: "4px 10px 2px 10px",
-                        border: "1px solid white",
-                        borderRadius: "4px",
-                        backgroundColor: "#e0e7ff",
-                        color: "black",
-                        fontWeight: "bold",
-                        textTransform: "uppercase",
-                        verticalAlign: "top",
-                        cursor: "pointer",
-                        margin: "0 auto 0 auto",
-                        borderBottom: "1px solid #e0e0e0",
-                        display: "block",
-                        width: "100%",
-                        boxSizing: "border-box",
-                        textAlign: "center"
-                    });
+                Object.assign(btn.style, {
+                    padding: "4px 10px 2px 10px",
+                    border: "1px solid white",
+                    borderRadius: "4px",
+                    backgroundColor: "#e0e7ff",
+                    color: "black",
+                    fontWeight: "bold",
+                    textTransform: "uppercase",
+                    verticalAlign: "top",
+                    cursor: "pointer",
+                    margin: "0 auto 0 auto",
+                    borderBottom: "1px solid #e0e0e0",
+                    display: "block",
+                    width: "100%",
+                    boxSizing: "border-box",
+                    textAlign: "center"
+                });
                 td.innerText = "";
                 td.appendChild(btn);
             });
