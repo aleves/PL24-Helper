@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Porsche
 // @namespace    Violentmonkey Scripts
-// @version      2.06
+// @version      2.07
 // @description  PL24 Helper - Porsche
 // @author       aleves
 // @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5vwag~porsche_parts*
@@ -91,7 +91,7 @@
             const existingNewPrices = document.querySelectorAll("[id*=\"_c\"] [class*=\"_price\"] span.new-price");
             if (existingNewPrices.length > 0) return;
 
-            const priceTds = [...document.querySelectorAll("[class*=acc][class*=p5t][class*=price] span.p5_cell_content_vert_middle")]
+            const priceTds = [...document.querySelectorAll("[class*=acc][class*=p5t][class*=price] span.p5_cell_content_vert_middle, [class*=acc][class*=p5t][class*=price] span.p5_vertical_align_mid")]
             priceTds.forEach((td) =>
             {
                 const priceText = td.innerText.trim()

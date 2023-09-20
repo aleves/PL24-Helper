@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - MB
 // @namespace    Violentmonkey Scripts
-// @version      2.08
+// @version      2.09
 // @description  PL24 Helper - MB
 // @author       aleves
 // @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5daimler~mercedes_parts*
@@ -17,7 +17,7 @@
 {
     "use strict";
 
-    var debug = false;
+    var debug = true;
     if (debug)
     {
         enable_logging();
@@ -93,7 +93,7 @@
             const existingNewPrices = document.querySelectorAll("[id*=\"_c\"] [class*=\"_price\"] span.new-price");
             if (existingNewPrices.length > 0) return;
 
-            const priceTds = [...document.querySelectorAll("[class*=acc][class*=p5t][class*=price] span.p5_cell_content_vert_middle")]
+            const priceTds = [...document.querySelectorAll("[class*=acc][class*=p5t][class*=price] span.p5_cell_content_vert_middle, [class*=acc][class*=p5t][class*=price] span.p5_vertical_align_mid")]
             priceTds.forEach((td) =>
             {
                 const priceText = td.innerText.trim()
