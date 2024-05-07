@@ -1,12 +1,12 @@
 /* eslint-disable no-control-regex */
 /* eslint-disable no-undef */
 // ==UserScript==
-// @name         PL24 Helper - Land Rover
+// @name         PL24 Helper - Toyota
 // @namespace    Violentmonkey Scripts
-// @version      2.09
-// @description  PL24 Helper - Land Rover
+// @version      2.00
+// @description  PL24 Helper - Toyota
 // @author       aleves
-// @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5jlr~landrover_parts*
+// @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5toyota~toyota_parts*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=partslink24.com
 // @grant        none
 // ==/UserScript==
@@ -23,7 +23,7 @@
     // Logotyp för att indikera att skriptet är igång
 
     const logoDiv = document.createElement("div");
-    logoDiv.textContent = "PL24 Helper - Land Rover";
+    logoDiv.textContent = "PL24 Helper - Toyota";
     logoDiv.title = `v${GM_info.script.version}`
     Object.assign(logoDiv.style, {
         display: "inline-block",
@@ -111,7 +111,7 @@
                 {
                     const partNumber = td.closest("[id*=\"_c\"]")
                         .querySelector("[class*=\"_partno\"]")
-                        .innerText.trim().replace("* ", "").replace(/\s+/g, " ").replace(/\s*\(.*?\)/g, "");
+                        .innerText.trim().replace("* ", "").replace(/\s/g, "");
                     const button = document.createElement("button");
                     button.innerText = td.innerText;
                     button.title = "Sök på Bildelsbasen (Ny flik)";
@@ -190,7 +190,7 @@
                 btn.title = "Kopiera nummer";
                 btn.addEventListener("click", event =>
                 {
-                    navigator.clipboard.writeText(td.innerText.trim().replace("* ", "").replace(/\s+/g, " ").replace(/\s*\(.*?\)/g, ""));
+                    navigator.clipboard.writeText(td.innerText.trim().replace("* ", "").replace(/\s+/g, " "));
                     const notification = document.createElement("div");
                     notification.innerText = "Kopierad!";
                     Object.assign(notification.style,

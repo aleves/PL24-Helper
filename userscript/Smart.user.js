@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Smart
 // @namespace    Violentmonkey Scripts
-// @version      2.09
+// @version      2.10
 // @description  PL24 Helper - Smart
 // @author       aleves
 // @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5daimler~smart_parts*
@@ -24,6 +24,7 @@
 
     const logoDiv = document.createElement("div");
     logoDiv.textContent = "PL24 Helper - Smart";
+    logoDiv.title = `v${GM_info.script.version}`
     Object.assign(logoDiv.style, {
         display: "inline-block",
         fontFamily: "Arial, sans-serif",
@@ -36,7 +37,8 @@
         borderRadius: "8px",
         position: "relative",
         right: "1rem",
-        zIndex: "666"
+        zIndex: "666",
+        cursor: "default"
     });
 
     const observer = new MutationObserver((mutations) =>
@@ -109,13 +111,13 @@
                 {
                     const partNumber = td.closest("[id*=\"_c\"]")
                         .querySelector("[class*=\"_partno\"]")
-                        .innerText.trim().replace("* ", "").replace(/\s+/g, " ");
+                        .innerText.trim().replace("* ", "").replace(/\s/g, "");
                     const button = document.createElement("button");
                     button.innerText = td.innerText;
                     button.title = "Sök på Bildelsbasen (Ny flik)";
                     button.addEventListener("click", (event) =>
                     {
-                        const searchUrl = `https://www.bildelsbasen.se/se-sv/OEM/${partNumber}/?page=1&order=price&asc=1`;
+                        const searchUrl = `https://www.bildelsbasen.se/se-sv/OEM/${partNumber}/`;
                         window.open(searchUrl, "_blank");
                         event.preventDefault();
                         event.stopPropagation();
@@ -174,7 +176,7 @@
         const runCode = () =>
         {
             const partnoTds = [...document.querySelectorAll("[class*=acc][class*=p5t][class*=partno]")]
-                .flatMap(div => div.className.endsWith("_acc") ? [] : [div])
+                .flatMap(div => (div.className.endsWith("_acc") || div.getAttribute("title") === "Artikelnummer") ? [] : [div])
                 .sort((a, b) => a.className > b.className ? 1 : -1);
             partnoTds.forEach(td =>
             {
@@ -291,7 +293,7 @@
                             if (title.textContent.trim() === "Bytesartikel")
                             {
                                 const p5AccHeader = title.closest("[class*=\"p5_accordion\"]");
-                                if (p5AccHeader) p5AccHeader.style.backgroundImage = "linear-gradient(to right, #ffa078, #ffd845)";
+                                if (p5AccHeader) p5AccHeader.style.backgroundImage = "linear-gradient(to right, #78d7ff, #456cff)";
                             }
                         }
                     }
