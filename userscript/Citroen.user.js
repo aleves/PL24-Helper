@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Citroën
 // @namespace    Violentmonkey Scripts
-// @version      1.03
+// @version      1.04
 // @description  PL24 Helper - Citroën
 // @author       aleves
 // @match        https://www.partslink24.com/psa/citroen_parts/*
@@ -19,6 +19,7 @@
 
     const logoDiv = document.createElement("div");
     logoDiv.textContent = "PL24 Helper - Citroën";
+    logoDiv.title = `v${GM_info.script.version}`
     Object.assign(logoDiv.style,
         {
             display: "inline-block",
@@ -33,7 +34,8 @@
             right: "10px",
             top: "50%",
             transform: "translateY(-50%)",
-            zIndex: "666"
+            zIndex: "666",
+            cursor: "default"
         });
     document.querySelector("#linksAndBreadCrumbs")
         .appendChild(logoDiv);
@@ -189,11 +191,6 @@
                         const cleanedPartno = partno.replace(/\s/g, "");
                         navigator.clipboard.writeText(cleanedPartno);
                         notificationText = "Kopierad utan mellanslag!";
-                        btn.addEventListener("contextmenu", event =>
-                        {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        });
                     }
                     else
                     {
@@ -215,7 +212,8 @@
                         color: "#333333",
                         boxShadow: "0px 4px 16px rgba(0, 0, 0, 0.3)",
                         zIndex: "9999",
-                        transition: "opacity 0.4s ease-out"
+                        transition: "opacity 0.4s ease-out",
+                        pointerEvents: "none"
                     });
                     document.body.appendChild(notification);
                     setTimeout(() =>
@@ -226,8 +224,6 @@
                             document.body.removeChild(notification);
                         }, 200);
                     }, 500);
-                    event.preventDefault();
-                    event.stopPropagation();
                 });
                 Object.assign(btn.style, {
                     padding: "4px 10px 2px 10px",
@@ -245,6 +241,12 @@
                     width: "100%",
                     boxSizing: "border-box",
                     textAlign: "center"
+                });
+                btn.addEventListener("contextmenu", event =>
+                {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return false;
                 });
                 td.innerText = "";
                 td.appendChild(btn);

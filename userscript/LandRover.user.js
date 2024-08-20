@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Land Rover
 // @namespace    Violentmonkey Scripts
-// @version      2.09
+// @version      2.10
 // @description  PL24 Helper - Land Rover
 // @author       aleves
 // @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5jlr~landrover_parts*
@@ -148,24 +148,18 @@
         {
             const loadAnimation = document.querySelector("div.p5_load_animation");
             if (!loadAnimation) return;
-            const observer = new MutationObserver((mutations) =>
+            const intervalId = setInterval(() =>
             {
-                for (const { type, addedNodes } of mutations)
-                {
-                    if (type === "childList" && addedNodes.length)
-                    {
-                        const intervalId = setInterval(() =>
-                        {
-                            if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr]):not([id*=searchresult]):not([id*=vinfoEquipment]):not([id*=vinfoVDP])>*") && (clearInterval(intervalId), runCode(), true)) return;
-                        }, 50);
-                    }
-                }
-            });
-            observer.observe(loadAnimation, { childList: true });
+                if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr]):not([id*=searchresult]):not([id*=vinfoEquipment]):not([id*=vinfoVDP])>*") && (clearInterval(intervalId), runCode(), true)) return;
+            }, 100);
         };
 
         observeLoadAnimation();
-        targetNode.addEventListener("DOMNodeInserted", observeLoadAnimation);
+        const observer = new MutationObserver(() =>
+        {
+            observeLoadAnimation();
+        });
+        observer.observe(targetNode, { childList: true, subtree: true });
     }
 
     // Gör om PC-nummer i rutorna som öppnas till knappar som kopierar numret åt användaren
@@ -187,12 +181,27 @@
 
                 const btn = document.createElement("button");
                 btn.innerText = td.innerText;
-                btn.title = "Kopiera nummer";
-                btn.addEventListener("click", event =>
+                btn.title = "Vänsterklick = Kopiera primärt nummer\nHögerklick = Kopiera sekundärt nummer";
+                btn.addEventListener("mouseup", event =>
                 {
-                    navigator.clipboard.writeText(td.innerText.trim().replace("* ", "").replace(/\s+/g, " ").replace(/\s*\(.*?\)/g, ""));
+
+                    let notificationText = "";
+                    const partno = td.innerText.trim();
+                    if (event.button === 2 && /^[A-Z0-9]+ \([A-Z0-9]+\)$/.test(partno))
+                    {
+                        const match = partno.match(/^[A-Z0-9]+ \(([A-Z0-9]+)\)$/);
+                        const cleanedPartno =  match[1];
+                        navigator.clipboard.writeText(cleanedPartno);
+                        notificationText = "Kopierad sekundärt!";
+                    }
+                    else
+                    {
+                        navigator.clipboard.writeText(td.innerText.trim().replace("* ", "").replace(/\s+/g, " ").replace(/\s*\(.*?\)/g, ""));
+                        notificationText = "Kopierad primärt!";
+                    }
+
                     const notification = document.createElement("div");
-                    notification.innerText = "Kopierad!";
+                    notification.innerText = notificationText;
                     Object.assign(notification.style,
                         {
                             position: "absolute",
@@ -206,7 +215,8 @@
                             color: "#333333",
                             boxShadow: "0px 4px 16px rgba(0, 0, 0, 0.3)",
                             zIndex: "9999",
-                            transition: "opacity 0.4s ease-out"
+                            transition: "opacity 0.4s ease-out",
+                            pointerEvents: "none"
                         });
                     document.body.appendChild(notification);
                     setTimeout(() =>
@@ -217,8 +227,6 @@
                             document.body.removeChild(notification);
                         }, 200);
                     }, 500);
-                    event.preventDefault();
-                    event.stopPropagation();
                 });
                 Object.assign(btn.style,
                     {
@@ -238,6 +246,12 @@
                         boxSizing: "border-box",
                         textAlign: "center"
                     });
+                btn.addEventListener("contextmenu", event =>
+                {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return false;
+                });
                 td.innerText = "";
                 td.appendChild(btn);
             });
@@ -247,24 +261,18 @@
         {
             const loadAnimation = document.querySelector("div.p5_load_animation");
             if (!loadAnimation) return;
-            const observer = new MutationObserver((mutations) =>
+            const intervalId = setInterval(() =>
             {
-                for (const { type, addedNodes } of mutations)
-                {
-                    if (type === "childList" && addedNodes.length)
-                    {
-                        const intervalId = setInterval(() =>
-                        {
-                            if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr]):not([id*=searchresult]):not([id*=vinfoEquipment]):not([id*=vinfoVDP])>*") && (clearInterval(intervalId), runCode(), true)) return;
-                        }, 50);
-                    }
-                }
-            });
-            observer.observe(loadAnimation, { childList: true });
+                if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr]):not([id*=searchresult]):not([id*=vinfoEquipment]):not([id*=vinfoVDP])>*") && (clearInterval(intervalId), runCode(), true)) return;
+            }, 100);
         };
 
         observeLoadAnimation();
-        targetNode.addEventListener("DOMNodeInserted", observeLoadAnimation);
+        const observer = new MutationObserver(() =>
+        {
+            observeLoadAnimation();
+        });
+        observer.observe(targetNode, { childList: true, subtree: true });
     }
 
     // Ändrar färgen på 'Nummerändring' så att risken att man missar det är lägre
@@ -276,32 +284,27 @@
         {
             const loadAnimation = document.querySelector("div.p5_load_animation");
             if (!loadAnimation) return;
-            const observer = new MutationObserver((mutations) =>
+            const p5AccHeaderTitles = document.querySelectorAll("#content [class*=\"p5_accordion_header\"]");
+            for (const title of p5AccHeaderTitles)
             {
-                for (const { type, addedNodes } of mutations)
+                if (title.textContent.trim() === "Nummerändring")
                 {
-                    if (type === "childList" && addedNodes.length)
-                    {
-                        const p5AccHeaderTitles = document.querySelectorAll("#content [class*=\"p5_accordion_header\"]");
-                        for (const title of p5AccHeaderTitles)
-                        {
-                            if (title.textContent.trim() === "Nummerändring")
-                            {
-                                const p5AccHeader = title.closest("[class*=\"p5_accordion\"]");
-                                if (p5AccHeader) p5AccHeader.style.backgroundImage = "linear-gradient(to right, #ff6a2b, #f7c400)";
-                            }
-                            if (title.textContent.trim() === "Bytesartikel")
-                            {
-                                const p5AccHeader = title.closest("[class*=\"p5_accordion\"]");
-                                if (p5AccHeader) p5AccHeader.style.backgroundImage = "linear-gradient(to right, #78d7ff, #456cff)";
-                            }
-                        }
-                    }
+                    const p5AccHeader = title.closest("[class*=\"p5_accordion\"]");
+                    if (p5AccHeader) p5AccHeader.style.backgroundImage = "linear-gradient(to right, #ff6a2b, #f7c400)";
                 }
-            });
-            observer.observe(loadAnimation, { childList: true });
+                if (title.textContent.trim() === "Bytesartikel")
+                {
+                    const p5AccHeader = title.closest("[class*=\"p5_accordion\"]");
+                    if (p5AccHeader) p5AccHeader.style.backgroundImage = "linear-gradient(to right, #78d7ff, #456cff)";
+                }
+            }
         };
+
         observeLoadAnimation();
-        targetNode.addEventListener("DOMNodeInserted", observeLoadAnimation);
+        const observer = new MutationObserver(() =>
+        {
+            observeLoadAnimation();
+        });
+        observer.observe(targetNode, { childList: true, subtree: true });
     }
 })();

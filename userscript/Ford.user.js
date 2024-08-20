@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Ford
 // @namespace    Violentmonkey Scripts
-// @version      1.04
+// @version      1.05
 // @description  PL24 Helper - Ford
 // @author       aleves
 // @match        https://www.partslink24.com/ford/fordp_parts/*
@@ -19,6 +19,7 @@
 
     const logoDiv = document.createElement("div");
     logoDiv.textContent = "PL24 Helper - Ford";
+    logoDiv.title = `v${GM_info.script.version}`
     Object.assign(logoDiv.style,
         {
             display: "inline-block",
@@ -33,7 +34,8 @@
             right: "10px",
             top: "50%",
             transform: "translateY(-50%)",
-            zIndex: "666"
+            zIndex: "666",
+            cursor: "default"
         });
     document.querySelector("#linksAndBreadCrumbs")
         .appendChild(logoDiv);
@@ -286,11 +288,6 @@
                         const cleanedPartno = partno.replace(/-/g, "");
                         navigator.clipboard.writeText(cleanedPartno);
                         notificationText = "Kopierad utan bindestreck!";
-                        btn.addEventListener("contextmenu", event =>
-                        {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        });
                     }
                     else
                     {
@@ -312,7 +309,8 @@
                         color: "#333333",
                         boxShadow: "0px 4px 16px rgba(0, 0, 0, 0.3)",
                         zIndex: "9999",
-                        transition: "opacity 0.4s ease-out"
+                        transition: "opacity 0.4s ease-out",
+                        pointerEvents: "none"
                     });
                     document.body.appendChild(notification);
                     setTimeout(() =>
@@ -323,8 +321,6 @@
                             document.body.removeChild(notification);
                         }, 200);
                     }, 500);
-                    event.preventDefault();
-                    event.stopPropagation();
                 });
                 Object.assign(btn.style, {
                     border: "1px solid white",
@@ -339,6 +335,12 @@
                     width: "100%",
                     boxSizing: "border-box",
                     textAlign: "center"
+                });
+                btn.addEventListener("contextmenu", event =>
+                {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return false;
                 });
                 td.innerText = "";
                 td.appendChild(btn);
