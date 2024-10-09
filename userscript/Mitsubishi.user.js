@@ -3,10 +3,10 @@
 // ==UserScript==
 // @name         PL24 Helper - Mitsubishi
 // @namespace    Violentmonkey Scripts
-// @version      1.00
+// @version      2.00
 // @description  PL24 Helper - Mitsubishi
 // @author       aleves
-// @match        https://www.partslink24.com/mitsubishi/mmc_parts/*
+// @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5mitsubishi~mmc_parts*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=partslink24.com
 // @grant        none
 // ==/UserScript==
@@ -14,79 +14,85 @@
 {
     "use strict";
 
+    var debug = false;
+    if (debug)
+    {
+        enable_logging();
+    }
+
     // Logotyp för att indikera att skriptet är igång
 
     const logoDiv = document.createElement("div");
     logoDiv.textContent = "PL24 Helper - Mitsubishi";
-    Object.assign(logoDiv.style,
-        {
-            display: "inline-block",
-            fontFamily: "Arial, sans-serif",
-            fontSize: "14px",
-            fontWeight: "bold",
-            color: "#ffffff",
-            background: "linear-gradient(to top right, #008080, #66b2b2)",
-            padding: "5px 10px",
-            borderRadius: "8px",
-            position: "absolute",
-            right: "10px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            zIndex: "666"
-        });
-    document.querySelector("#linksAndBreadCrumbs")
-        .appendChild(logoDiv);
+    logoDiv.title = `v${GM_info.script.version}`
+    Object.assign(logoDiv.style, {
+        display: "inline-block",
+        fontFamily: "Arial, sans-serif",
+        fontSize: "14px",
+        fontWeight: "bold",
+        color: "#ffffff",
+        ["text-shadow"]: "-1px 1px .25px rgba(0, 0, 0, 0.67), -1px 0 .25px rgba(0, 0, 0, 0.67)",
+        background: "linear-gradient(to top right, #009f70, #bbcf00)",
+        padding: "5px 10px",
+        borderRadius: "8px",
+        position: "relative",
+        right: "1rem",
+        zIndex: "666",
+        cursor: "default"
+    });
 
-    // Scrollhjulet kan zooma illustrationen in och ut
-
-    const debounce =
-        (func, wait = 10) =>
-            (...args) =>
-                setTimeout(() => func(...args), wait);
-
-    const zoomPlusButton = document.querySelector("#zoom-plus");
-    const zoomMinusButton = document.querySelector("#zoom-minus");
-    //const glassPane = document.querySelector("#GlassPane");
-
-    const handleScrollInsideGlassPane = debounce((event) =>
+    const observer = new MutationObserver((mutations) =>
     {
-        const isZoomInDisabled =
-            zoomPlusButton.classList.contains("toolbarBtnDisabled");
-        const isZoomOutDisabled =
-            zoomMinusButton.classList.contains("toolbarBtnDisabled");
-
-        if (
-            event.target.closest("#GlassPane") &&
-            event.deltaY < 0 &&
-            !isZoomInDisabled
-        )
+        for (const mutation of mutations)
         {
-            ImageView.sendMessage("ZoomIn", null);
-        }
-
-        if (
-            event.target.closest("#GlassPane") &&
-            event.deltaY > 0 &&
-            !isZoomOutDisabled
-        )
-        {
-            ImageView.sendMessage("ZoomOut", null);
+            if (mutation.addedNodes.length > 0 && mutation.addedNodes[0].matches("#dealer_header_container > div"))
+            {
+                const headerContainer = document.querySelector("#dealer_header_container");
+                const headerContainerDiv = document.querySelector("#dealer_header_container > div");
+                headerContainer.insertBefore(logoDiv, headerContainerDiv);
+                observer.disconnect();
+            }
         }
     });
 
-    window.addEventListener("wheel", handleScrollInsideGlassPane);
+    observer.observe(document.querySelector("#dealer_header_container"), { childList: true });
+
+    // Tar bort mellanslag inuti sökrutan
+
+    if (document.querySelector("#search_query"))
+    {
+        const searchInput = document.querySelector("#search_query");
+        const searchIcon = document.querySelector("#search_icon");
+        const removeWhitespace = (value) =>
+            value.replace(/\s/g, "");
+
+        searchInput.addEventListener("keydown", (event) =>
+        {
+            if (event.key === "Enter")
+            {
+                event.preventDefault();
+                searchInput.value = removeWhitespace(searchInput.value);
+            }
+        });
+
+        searchIcon.addEventListener("mousedown", (event) =>
+        {
+            event.preventDefault();
+            searchInput.value = removeWhitespace(searchInput.value);
+        });
+    }
 
     // Om ett cirkapris saknas skapas en knapp för att söka direkt på Bildelsbasen (öppnas i ny flik)
 
-    if (document.querySelector("#partin4dlg"))
+    if (document.querySelector("#content"))
     {
-        const targetNode = document.querySelector("#partin4dlg");
+        const targetNode = document.querySelector("#content");
         const runCode = () =>
         {
-            const existingNewPrices = document.querySelectorAll("#partin4content td.partinfoPriceCol span.new-price");
+            const existingNewPrices = document.querySelectorAll("[id*=\"_c\"] [class*=\"_price\"] span.new-price");
             if (existingNewPrices.length > 0) return;
 
-            const priceTds = document.querySelectorAll("#partin4content td.partinfoPriceCol:not(.partin4partspromCol)");
+            const priceTds = [...document.querySelectorAll("[class=p5_table_data_acc] div[class*=p5t][class*=price] span.p5_cell_content")]
             priceTds.forEach((td) =>
             {
                 const priceText = td.innerText.trim()
@@ -97,21 +103,21 @@
                     const newPrice = price / 2;
                     const span = document.createElement("span");
                     span.innerText = `\n / ${newPrice.toLocaleString("sv-SE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                    span.style.fontSize = "9.25px";
+                    span.style.fontSize = "11.75px";
                     span.classList.add("new-price");
                     td.appendChild(span);
                 }
                 else
                 {
-                    const partNumber = td.closest("tr")
-                        .querySelector(".partinfoPartnoCol")
-                        .innerText.trim();
+                    const partNumber = td.closest("[id*=\"_c\"]")
+                        .querySelector("[class*=\"_id\"]")
+                        .innerText.trim().replace("* ", "").replace(/\s/g, "");
                     const button = document.createElement("button");
                     button.innerText = td.innerText;
                     button.title = "Sök på Bildelsbasen (Ny flik)";
                     button.addEventListener("click", (event) =>
                     {
-                        const searchUrl = `https://www.bildelsbasen.se/se-sv/OEM/${partNumber}/?page=1&order=price&asc=1`;
+                        const searchUrl = `https://www.bildelsbasen.se/se-sv/OEM/${partNumber}/`;
                         window.open(searchUrl, "_blank");
                         event.preventDefault();
                         event.stopPropagation();
@@ -127,7 +133,7 @@
                         margin: "0 auto 0 auto",
                         borderBottom: "1px solid #e0e0e0",
                         display: "block",
-                        width: "150%",
+                        width: "100%",
                         boxSizing: "border-box",
                         textAlign: "center"
                     };
@@ -137,38 +143,35 @@
                 }
             });
         };
-        const observer = new MutationObserver((mutationsList) =>
+
+        const observeLoadAnimation = () =>
         {
-            mutationsList.forEach((mutation) =>
+            const loadAnimation = document.querySelector("div.p5_load_animation");
+            if (!loadAnimation) return;
+            const intervalId = setInterval(() =>
             {
-                if (mutation.type === "childList" && document.querySelector("#partin4dlg > div.blockUI.blockOverlay"))
-                {
-                    const intervalId = setInterval(() =>
-                    {
-                        const partinfoTable = document.querySelector("#partin4MainTable tbody");
-                        if (partinfoTable && partinfoTable.childElementCount > 0)
-                        {
-                            clearInterval(intervalId);
-                            runCode();
-                        }
-                    }, 75);
-                }
-            });
+                if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr]):not([id*=searchresult]):not([id*=vinfoEquipment]):not([id*=vinfoVDP]):not([id*=mainGroupsTable])>*") && (clearInterval(intervalId), runCode(), true)) return;
+            }, 100);
+        };
+
+        observeLoadAnimation();
+        const observer = new MutationObserver(() =>
+        {
+            observeLoadAnimation();
         });
-        observer.observe(targetNode,
-            {
-                childList: true
-            });
+        observer.observe(targetNode, { childList: true, subtree: true });
     }
 
     // Gör om PC-nummer i rutorna som öppnas till knappar som kopierar numret åt användaren
 
-    if (document.querySelector("#partin4dlg"))
+    if (document.querySelector("#content"))
     {
-        const targetNode = document.querySelector("#partin4dlg");
+        const targetNode = document.querySelector("#content");
         const runCode = () =>
         {
-            const partnoTds = document.querySelectorAll("#partin4content td.partinfoPartnoCol");
+            const partnoTds = [...document.querySelectorAll("[class*=acc][class*=p5t][class*=id]")]
+                .flatMap(div => (div.className.endsWith("_acc") || div.getAttribute("title") === "Artikelnummer") ? [] : [div])
+                .sort((a, b) => a.className > b.className ? 1 : -1);
             partnoTds.forEach(td =>
             {
                 if (td.innerText.trim() === "")
@@ -181,7 +184,7 @@
                 btn.title = "Kopiera nummer";
                 btn.addEventListener("click", event =>
                 {
-                    navigator.clipboard.writeText(td.innerText.trim());
+                    navigator.clipboard.writeText(td.innerText.trim().replace("* ", "").replace(/\s+/g, " "));
                     const notification = document.createElement("div");
                     notification.innerText = "Kopierad!";
                     Object.assign(notification.style,
@@ -234,127 +237,54 @@
             });
         };
 
-        new MutationObserver(mutationsList =>
+        const observeLoadAnimation = () =>
         {
-            mutationsList.forEach(mutation =>
+            const loadAnimation = document.querySelector("div.p5_load_animation");
+            if (!loadAnimation) return;
+            const intervalId = setInterval(() =>
             {
-                if (mutation.type === "childList" && document.querySelector("#partin4dlg > div.blockUI.blockOverlay"))
-                {
-                    const intervalId = setInterval(() =>
-                    {
-                        const partinfoTable = document.querySelector("#partin4MainTable tbody");
-                        if (partinfoTable && partinfoTable.childElementCount > 0)
-                        {
-                            clearInterval(intervalId);
-                            runCode();
-                        }
-                    }, 75);
-                }
-            });
-        })
-            .observe(targetNode,
-                {
-                    childList: true
-                });
+                if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr]):not([id*=searchresult]):not([id*=vinfoEquipment]):not([id*=vinfoVDP]):not([id*=mainGroupsTable])>*") && (clearInterval(intervalId), runCode(), true)) return;
+            }, 100);
+        };
+
+        observeLoadAnimation();
+        const observer = new MutationObserver(() =>
+        {
+            observeLoadAnimation();
+        });
+        observer.observe(targetNode, { childList: true, subtree: true });
     }
 
     // Ändrar färgen på 'Nummerändring' så att risken att man missar det är lägre
 
-    if (document.querySelector("#partin4content"))
+    if (document.querySelector("#content"))
     {
-        const partin4content = document.querySelector("#partin4content");
-        const observer = new MutationObserver(() =>
+        const targetNode = document.querySelector("#content");
+        const observeLoadAnimation = () =>
         {
-            const partin4TabSupersessionsLink = document.querySelector("#partin4Tab-local > a");
-            if (partin4TabSupersessionsLink && partin4TabSupersessionsLink.getAttribute("href") === "#partin4TabDiv-local")
+            const loadAnimation = document.querySelector("div.p5_load_animation");
+            if (!loadAnimation) return;
+            const p5AccHeaderTitles = document.querySelectorAll("#content [class*=\"p5_accordion_header\"]");
+            for (const title of p5AccHeaderTitles)
             {
-                const partInfoTabsUl = document.querySelector("#partInfoTabs > ul");
-                if (partInfoTabsUl)
+                if (title.textContent.trim() === "Nummerändring")
                 {
-                    partInfoTabsUl.style.backgroundImage = "linear-gradient(to right, #ff6a2b, #f7c400)";
+                    const p5AccHeader = title.closest("[class*=\"p5_accordion\"]");
+                    if (p5AccHeader) p5AccHeader.style.backgroundImage = "linear-gradient(to right, #ff6a2b, #f7c400)";
+                }
+                if (title.textContent.trim() === "Bytesartikel")
+                {
+                    const p5AccHeader = title.closest("[class*=\"p5_accordion\"]");
+                    if (p5AccHeader) p5AccHeader.style.backgroundImage = "linear-gradient(to right, #78d7ff, #456cff)";
                 }
             }
-        });
+        };
 
-        observer.observe(partin4content, { childList: true });
-    }
-
-    // Skapar en knapp så att man kan ladda ner illustrationen som är framme
-
-    if (document.querySelector("#illustration-imageview-container"))
-    {
-        const illustrationButtons = document.getElementById("illustration-buttons");
-
-        const newTdElement = document.createElement("td");
-        newTdElement.classList.add("illuBtn");
-
-        const newAElement = document.createElement("a");
-        newAElement.id = "new-btn";
-        newAElement.classList.add("toolbarBtn", "toolbarBtnActive");
-        newAElement.href = "#";
-        newAElement.tabIndex = "-1";
-        newAElement.title = "Ladda ner illustration (PNG)";
-
-        const newSvgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        newSvgElement.setAttribute("viewBox", "0 0 121 123");
-        newSvgElement.setAttribute("fill", "#fff");
-        newSvgElement.innerHTML = "<path d=\"M0 0h121v94H88V84h22V10H11v74h21v10H0V0zm52 101V84h17v17h12l-21 22-20-22zM34 25a8 8 0 11-8 8 8 8 0 018-8zm33 34 16-28 16 43H22v-6h6l7-16 3 12h10l8-22 11 17z\"/>";
-        Object.assign(newSvgElement.style,
-            {
-                width: "100%",
-                height: "80%",
-                maxWidth: "100%",
-                maxHeight: "100%"
-            });
-        newAElement.appendChild(newSvgElement);
-
-        Object.assign(newAElement.style,
-            {
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: "transparent"
-            });
-
-        newAElement.addEventListener("mouseover", () =>
+        observeLoadAnimation();
+        const observer = new MutationObserver(() =>
         {
-            newAElement.style.backgroundColor = "#9a9b9d";
+            observeLoadAnimation();
         });
-
-        newAElement.addEventListener("mouseout", () =>
-        {
-            newAElement.style.backgroundColor = "transparent";
-        });
-
-        newTdElement.appendChild(newAElement);
-
-        const trimTdElement = illustrationButtons.querySelector(".trim");
-        trimTdElement.parentNode.insertBefore(newTdElement, trimTdElement);
-
-        const downloadBtn = document.getElementById("new-btn");
-        downloadBtn.addEventListener("click", () =>
-        {
-            ImageView.sendMessage("FitToWindow", null);
-
-            const mainImage = document.querySelector("#MainImage");
-            const imageSrc = mainImage.getAttribute("src");
-
-            const bboxRegex = /&bbox=[^&]*?(\d+)%2C(\d+)%2C(\d+)%2C(\d+)/;
-            const bboxMatch = imageSrc.match(bboxRegex);
-            const [, , , width, height] = bboxMatch;
-
-            const modifiedImageSrc = imageSrc
-                .replace(/(&bbox=[^&]*?)0*\d{1,3}(?=[^&]*?(&|$))/, "$10")
-                .replace(/&width=[^&]*/, "&width=" + width)
-                .replace(/&height=[^&]*/, "&height=" + height)
-                .replace(/&scalefac=[^&]*/, "&scalefac=1");
-
-            const link = document.createElement("a");
-            const [, , , number] = modifiedImageSrc.split("?path=")[1].split("&")[0].split("/");
-            const filename = `Mitsubishi_${number}`;
-            link.download = filename;
-            link.href = modifiedImageSrc;
-            link.click();
-        });
+        observer.observe(targetNode, { childList: true, subtree: true });
     }
 })();
