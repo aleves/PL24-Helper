@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Land Rover
 // @namespace    Violentmonkey Scripts
-// @version      2.10
+// @version      2.20
 // @description  PL24 Helper - Land Rover
 // @author       aleves
 // @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5jlr~landrover_parts*
@@ -35,8 +35,7 @@
         background: "linear-gradient(to top right, #009f70, #bbcf00)",
         padding: "5px 10px",
         borderRadius: "8px",
-        position: "relative",
-        right: "1rem",
+        margin: "inherit",
         zIndex: "666",
         cursor: "default"
     });
@@ -56,6 +55,102 @@
     });
 
     observer.observe(document.querySelector("#dealer_header_container"), { childList: true });
+
+    // Gömmer gråa rader
+
+    if (document.querySelector("#content"))
+    {
+        const toggleUnavailableRows = (isChecked) =>
+        {
+            document.querySelectorAll("[class=p5_table_data] [class*='p5_table_rec datarow unavailable']")
+                .forEach(element => element.style.display = isChecked ? "none" : "");
+        };
+
+        const saveCheckboxState = (isChecked) =>
+        {
+            localStorage.setItem(`${window.location.origin}/clean_unavailable_rows_state`, isChecked);
+        };
+
+        const getCachedCheckboxState = () =>
+        {
+            return localStorage.getItem(`${window.location.origin}/clean_unavailable_rows_state`) === "true";
+        };
+
+        const createCleanButton = () =>
+        {
+            const cleanButton = document.createElement("input");
+            cleanButton.type = "checkbox";
+            cleanButton.id = "clean_unavailable_rows";
+            cleanButton.checked = getCachedCheckboxState();
+
+            const cleanButtonLabel = document.createElement("label");
+            cleanButtonLabel.htmlFor = cleanButton.id;
+            cleanButtonLabel.textContent = "Göm gråa rader";
+            Object.assign(cleanButtonLabel.style, {
+                display: "inline-block", fontFamily: "Arial, sans-serif", fontSize: "12px",
+                fontWeight: "bold", color: "#ffffff", textShadow: "-1px 1px .125px rgba(0, 0, 0, 0.67)",
+                background: "linear-gradient(to bottom left, #009f70, #bbcf00)", padding: "4px 8px",
+                borderRadius: "6px", margin: "inherit", cursor: "pointer", userSelect: "none"
+            });
+
+            Object.assign(cleanButton.style, {
+                width: "16px", height: "16px", verticalAlign: "middle",
+                marginRight: "8px", cursor: "pointer"
+            });
+
+            cleanButton.addEventListener("change", () =>
+            {
+                const isChecked = cleanButton.checked;
+                toggleUnavailableRows(isChecked);
+                saveCheckboxState(isChecked);
+                if (isChecked) observeUnavailableRows();
+            });
+
+            return { cleanButton, cleanButtonLabel };
+        };
+
+        const observeUnavailableRows = () =>
+        {
+            const intervalId = setInterval(() =>
+            {
+                if (cleanButton.checked) toggleUnavailableRows(true);
+                else clearInterval(intervalId);
+            }, 100);
+        };
+
+        const { cleanButton, cleanButtonLabel } = createCleanButton();
+
+        const observer = new MutationObserver((mutations) =>
+        {
+            for (const mutation of mutations)
+            {
+                if (mutation.addedNodes.length > 0 && mutation.addedNodes[0].matches("#dealer_header_container > div"))
+                {
+                    const headerContainer = document.querySelector("#dealer_header_container");
+                    headerContainer.insertBefore(cleanButtonLabel, headerContainer.firstChild);
+                    headerContainer.insertBefore(cleanButton, cleanButtonLabel);
+                    observer.disconnect();
+                }
+            }
+        });
+
+        const targetNode = document.querySelector("#dealer_header_container");
+        if (targetNode) observer.observe(targetNode, { childList: true });
+
+        const tableObserver = new MutationObserver(() =>
+        {
+            if (cleanButton.checked) toggleUnavailableRows(true);
+        });
+
+        const tableNode = document.querySelector(".p5_table_data");
+        if (tableNode) tableObserver.observe(tableNode, { childList: true, subtree: true });
+
+        if (cleanButton.checked)
+        {
+            toggleUnavailableRows(true);
+            observeUnavailableRows();
+        }
+    }
 
     // Tar bort mellanslag inuti sökrutan
 

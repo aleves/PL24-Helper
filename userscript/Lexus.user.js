@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Lexus
 // @namespace    Violentmonkey Scripts
-// @version      2.00
+// @version      2.20
 // @description  PL24 Helper - Lexus
 // @author       aleves
 // @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5toyota~lexus_parts*
@@ -35,8 +35,7 @@
         background: "linear-gradient(to top right, #009f70, #bbcf00)",
         padding: "5px 10px",
         borderRadius: "8px",
-        position: "relative",
-        right: "1rem",
+        margin: "inherit",
         zIndex: "666",
         cursor: "default"
     });
@@ -56,6 +55,102 @@
     });
 
     observer.observe(document.querySelector("#dealer_header_container"), { childList: true });
+
+    // Gömmer gråa rader
+
+    if (document.querySelector("#content"))
+    {
+        const toggleUnavailableRows = (isChecked) =>
+        {
+            document.querySelectorAll("[class=p5_table_data] [class*='p5_table_rec datarow unavailable']")
+                .forEach(element => element.style.display = isChecked ? "none" : "");
+        };
+
+        const saveCheckboxState = (isChecked) =>
+        {
+            localStorage.setItem(`${window.location.origin}/clean_unavailable_rows_state`, isChecked);
+        };
+
+        const getCachedCheckboxState = () =>
+        {
+            return localStorage.getItem(`${window.location.origin}/clean_unavailable_rows_state`) === "true";
+        };
+
+        const createCleanButton = () =>
+        {
+            const cleanButton = document.createElement("input");
+            cleanButton.type = "checkbox";
+            cleanButton.id = "clean_unavailable_rows";
+            cleanButton.checked = getCachedCheckboxState();
+
+            const cleanButtonLabel = document.createElement("label");
+            cleanButtonLabel.htmlFor = cleanButton.id;
+            cleanButtonLabel.textContent = "Göm gråa rader";
+            Object.assign(cleanButtonLabel.style, {
+                display: "inline-block", fontFamily: "Arial, sans-serif", fontSize: "12px",
+                fontWeight: "bold", color: "#ffffff", textShadow: "-1px 1px .125px rgba(0, 0, 0, 0.67)",
+                background: "linear-gradient(to bottom left, #009f70, #bbcf00)", padding: "4px 8px",
+                borderRadius: "6px", margin: "inherit", cursor: "pointer", userSelect: "none"
+            });
+
+            Object.assign(cleanButton.style, {
+                width: "16px", height: "16px", verticalAlign: "middle",
+                marginRight: "8px", cursor: "pointer"
+            });
+
+            cleanButton.addEventListener("change", () =>
+            {
+                const isChecked = cleanButton.checked;
+                toggleUnavailableRows(isChecked);
+                saveCheckboxState(isChecked);
+                if (isChecked) observeUnavailableRows();
+            });
+
+            return { cleanButton, cleanButtonLabel };
+        };
+
+        const observeUnavailableRows = () =>
+        {
+            const intervalId = setInterval(() =>
+            {
+                if (cleanButton.checked) toggleUnavailableRows(true);
+                else clearInterval(intervalId);
+            }, 100);
+        };
+
+        const { cleanButton, cleanButtonLabel } = createCleanButton();
+
+        const observer = new MutationObserver((mutations) =>
+        {
+            for (const mutation of mutations)
+            {
+                if (mutation.addedNodes.length > 0 && mutation.addedNodes[0].matches("#dealer_header_container > div"))
+                {
+                    const headerContainer = document.querySelector("#dealer_header_container");
+                    headerContainer.insertBefore(cleanButtonLabel, headerContainer.firstChild);
+                    headerContainer.insertBefore(cleanButton, cleanButtonLabel);
+                    observer.disconnect();
+                }
+            }
+        });
+
+        const targetNode = document.querySelector("#dealer_header_container");
+        if (targetNode) observer.observe(targetNode, { childList: true });
+
+        const tableObserver = new MutationObserver(() =>
+        {
+            if (cleanButton.checked) toggleUnavailableRows(true);
+        });
+
+        const tableNode = document.querySelector(".p5_table_data");
+        if (tableNode) tableObserver.observe(tableNode, { childList: true, subtree: true });
+
+        if (cleanButton.checked)
+        {
+            toggleUnavailableRows(true);
+            observeUnavailableRows();
+        }
+    }
 
     // Tar bort mellanslag inuti sökrutan
 
@@ -148,24 +243,18 @@
         {
             const loadAnimation = document.querySelector("div.p5_load_animation");
             if (!loadAnimation) return;
-            const observer = new MutationObserver((mutations) =>
+            const intervalId = setInterval(() =>
             {
-                for (const { type, addedNodes } of mutations)
-                {
-                    if (type === "childList" && addedNodes.length)
-                    {
-                        const intervalId = setInterval(() =>
-                        {
-                            if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr]):not([id*=searchresult]):not([id*=vinfoEquipment]):not([id*=vinfoVDP])>*") && (clearInterval(intervalId), runCode(), true)) return;
-                        }, 50);
-                    }
-                }
-            });
-            observer.observe(loadAnimation, { childList: true });
+                if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr]):not([id*=searchresult]):not([id*=vinfoEquipment]):not([id*=vinfoVDP])>*") && (clearInterval(intervalId), runCode(), true)) return;
+            }, 100);
         };
 
         observeLoadAnimation();
-        targetNode.addEventListener("DOMNodeInserted", observeLoadAnimation);
+        const observer = new MutationObserver(() =>
+        {
+            observeLoadAnimation();
+        });
+        observer.observe(targetNode, { childList: true, subtree: true });
     }
 
     // Gör om PC-nummer i rutorna som öppnas till knappar som kopierar numret åt användaren
@@ -247,24 +336,18 @@
         {
             const loadAnimation = document.querySelector("div.p5_load_animation");
             if (!loadAnimation) return;
-            const observer = new MutationObserver((mutations) =>
+            const intervalId = setInterval(() =>
             {
-                for (const { type, addedNodes } of mutations)
-                {
-                    if (type === "childList" && addedNodes.length)
-                    {
-                        const intervalId = setInterval(() =>
-                        {
-                            if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr]):not([id*=searchresult]):not([id*=vinfoEquipment]):not([id*=vinfoVDP])>*") && (clearInterval(intervalId), runCode(), true)) return;
-                        }, 50);
-                    }
-                }
-            });
-            observer.observe(loadAnimation, { childList: true });
+                if (document.querySelector("[id*='_c0']:not([id*=vinfoBasic]):not([id*=prNr]):not([id*=searchresult]):not([id*=vinfoEquipment]):not([id*=vinfoVDP])>*") && (clearInterval(intervalId), runCode(), true)) return;
+            }, 100);
         };
 
         observeLoadAnimation();
-        targetNode.addEventListener("DOMNodeInserted", observeLoadAnimation);
+        const observer = new MutationObserver(() =>
+        {
+            observeLoadAnimation();
+        });
+        observer.observe(targetNode, { childList: true, subtree: true });
     }
 
     // Ändrar färgen på 'Nummerändring' så att risken att man missar det är lägre
@@ -276,32 +359,93 @@
         {
             const loadAnimation = document.querySelector("div.p5_load_animation");
             if (!loadAnimation) return;
-            const observer = new MutationObserver((mutations) =>
+            const p5AccHeaderTitles = document.querySelectorAll("#content [class*=\"p5_accordion_header\"]");
+            for (const title of p5AccHeaderTitles)
             {
-                for (const { type, addedNodes } of mutations)
+                if (title.textContent.trim() === "Nummerändring")
                 {
-                    if (type === "childList" && addedNodes.length)
-                    {
-                        const p5AccHeaderTitles = document.querySelectorAll("#content [class*=\"p5_accordion_header\"]");
-                        for (const title of p5AccHeaderTitles)
-                        {
-                            if (title.textContent.trim() === "Nummerändring")
-                            {
-                                const p5AccHeader = title.closest("[class*=\"p5_accordion\"]");
-                                if (p5AccHeader) p5AccHeader.style.backgroundImage = "linear-gradient(to right, #ff6a2b, #f7c400)";
-                            }
-                            if (title.textContent.trim() === "Bytesartikel")
-                            {
-                                const p5AccHeader = title.closest("[class*=\"p5_accordion\"]");
-                                if (p5AccHeader) p5AccHeader.style.backgroundImage = "linear-gradient(to right, #78d7ff, #456cff)";
-                            }
-                        }
-                    }
+                    const p5AccHeader = title.closest("[class*=\"p5_accordion\"]");
+                    if (p5AccHeader) p5AccHeader.style.backgroundImage = "linear-gradient(to right, #ff6a2b, #f7c400)";
                 }
-            });
-            observer.observe(loadAnimation, { childList: true });
+                if (title.textContent.trim() === "Bytesartikel")
+                {
+                    const p5AccHeader = title.closest("[class*=\"p5_accordion\"]");
+                    if (p5AccHeader) p5AccHeader.style.backgroundImage = "linear-gradient(to right, #78d7ff, #456cff)";
+                }
+            }
         };
+
         observeLoadAnimation();
-        targetNode.addEventListener("DOMNodeInserted", observeLoadAnimation);
+        const observer = new MutationObserver(() =>
+        {
+            observeLoadAnimation();
+        });
+        observer.observe(targetNode, { childList: true, subtree: true });
+    }
+
+    // skapar en knapp som leder till PartSouq om det skulle saknas produktlistor
+
+    if (document.querySelector("#content"))
+    {
+        const runCode = () =>
+        {
+            setTimeout(function()
+            {
+                if (document.querySelector("[class*=inline_error]"))
+                {
+                    const listError = document.querySelector("[class*=inline_error]");
+                    const vinNum = document.querySelector("[class*=p5_vehicle_info_vin]").innerText.trim();
+                    const button = document.createElement("button");
+                    button.innerText = "Sök chassinummer/VIN på PartSouq (Ny flik)";
+                    button.addEventListener("click", (event) =>
+                    {
+                        const searchUrl = `https://partsouq.com/en/search/all?q=${vinNum}`;
+                        window.open(searchUrl, "_blank");
+                        event.preventDefault();
+                        event.stopPropagation();
+                    });
+                    const buttonStyle = {
+                        padding: "4px 10px 2px 10px",
+                        border: "1px solid white",
+                        borderRadius: "4px",
+                        backgroundColor: "#e0e7ff",
+                        color: "black",
+                        verticalAlign: "top",
+                        cursor: "pointer",
+                        margin: "0 auto 0 auto",
+                        borderBottom: "1px solid #e0e0e0",
+                        display: "inline",
+                        boxSizing: "border-box",
+                        textAlign: "center"
+                    };
+                    Object.assign(button.style, buttonStyle);
+                    listError.parentElement.insertBefore(button, listError.nextSibling);
+                }
+            }, 250);
+        }
+
+        const targetNode = document.querySelector("#content");
+        var found = false;
+        const observeError = () =>
+        {
+            const listError = document.querySelector("[class*=inline_error]");
+            if (!listError)
+            {
+                found = false;
+                return;
+            }
+            if (!found)
+            {
+                found = true;
+                runCode();
+            }
+        };
+
+        observeError();
+        const observer = new MutationObserver(() =>
+        {
+            observeError();
+        });
+        observer.observe(targetNode, { childList: true, subtree: true });
     }
 })();
