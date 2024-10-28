@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - SEAT
 // @namespace    Violentmonkey Scripts
-// @version      2.20
+// @version      2.21
 // @description  PL24 Helper - SEAT
 // @author       aleves
 // @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5vwag~seat_parts*
@@ -64,6 +64,12 @@
         const toggleUnavailableRows = (isChecked) =>
         {
             document.querySelectorAll("[class=p5_table_data] [class*='p5_table_rec datarow unavailable']")
+                .forEach(element => element.style.display = isChecked ? "none" : "");
+
+            document.querySelectorAll("[class=grana_illustration_pages_content] [class*='grana-illustration-page-tile unavailable']")
+                .forEach(element => element.style.display = isChecked ? "none" : "");
+
+            document.querySelectorAll("[class=grana_illustration_pages_content] [class*='p5_table_rec datarow link p5_border_bottom  unavailable']")
                 .forEach(element => element.style.display = isChecked ? "none" : "");
         };
 
