@@ -2,17 +2,22 @@
 /* eslint-disable no-undef */
 // ==UserScript==
 // @name         PL24 Helper - Jaguar
-// @namespace    Violentmonkey Scripts
-// @version      2.21
+// @namespace    http://tampermonkey.net/
+// @version      2.22
 // @description  PL24 Helper - Jaguar
 // @author       aleves
-// @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5jlr~jaguar_parts*
+// @match        https://www.partslink24.com/p5/*/p5.html*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=partslink24.com
 // @grant        none
 // ==/UserScript==
 (function()
 {
     "use strict";
+
+    if (!window.location.hash.includes("p5jlr~jaguar_parts"))
+    {
+        return;
+    }
 
     var debug = false;
     if (debug)

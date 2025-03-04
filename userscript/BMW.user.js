@@ -2,20 +2,29 @@
 /* eslint-disable no-undef */
 // ==UserScript==
 // @name         PL24 Helper - BMW
-// @namespace    Violentmonkey Scripts
-// @version      2.21
+// @namespace    http://tampermonkey.net/
+// @version      2.22
 // @description  PL24 Helper - BMW
 // @author       aleves
-// @match        https://www.partslink24.com/p5/*/p5.html#%2Fp5bmw~bmw_parts*
-// @include      https://www.partslink24.com/p5/*/p5.html#%2Fp5bmw~bmwclassic_parts*
-// @include      https://www.partslink24.com/p5/*/p5.html#%2Fp5bmw~bmwmotorrad_parts*
-// @include      https://www.partslink24.com/p5/*/p5.html#%2Fp5bmw~bmwmotorradclassic_parts*
+// @match        https://www.partslink24.com/p5/*/p5.html*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=partslink24.com
 // @grant        none
 // ==/UserScript==
 (function()
 {
     "use strict";
+
+    if (
+        (
+            !window.location.hash.includes("p5bmw~bmw_parts") &&
+            !window.location.hash.includes("p5bmw~bmwclassic_parts") &&
+            !window.location.hash.includes("p5bmw~bmwmotorrad_parts") &&
+            !window.location.hash.includes("p5bmw~bmwmotorradclassic_parts")
+        )
+    )
+    {
+        return;
+    }
 
     var debug = false;
     if (debug)
