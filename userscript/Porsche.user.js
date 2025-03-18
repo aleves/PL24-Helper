@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Porsche
 // @namespace    http://tampermonkey.net/
-// @version      2.22
+// @version      2.23
 // @description  PL24 Helper - Porsche
 // @author       aleves
 // @match        https://www.partslink24.com/p5/*/p5.html*
@@ -32,39 +32,42 @@
 
     // Logotyp för att indikera att skriptet är igång
 
-    const logoDiv = document.createElement("div");
-    logoDiv.textContent = "PL24 Helper - Porsche";
-    logoDiv.title = `v${GM_info.script.version}`
-    Object.assign(logoDiv.style, {
-        display: "inline-block",
-        fontFamily: "Arial, sans-serif",
-        fontSize: "14px",
-        fontWeight: "bold",
-        color: "#ffffff",
-        ["text-shadow"]: "-1px 1px .25px rgba(0, 0, 0, 0.67), -1px 0 .25px rgba(0, 0, 0, 0.67)",
-        background: "linear-gradient(to top right, #009f70, #bbcf00)",
-        padding: "5px 10px",
-        borderRadius: "8px",
-        margin: "inherit",
-        zIndex: "666",
-        cursor: "default"
+    const logoDiv = Object.assign(document.createElement("div"), {
+        textContent: "PL24 Helper - Porsche",
+        title: `v${GM_info.script.version}`,
+        style: `
+            display: block;
+            font: bold 14px Arial, sans-serif;
+            color: #fff;
+            text-shadow: -1px 1px .25px rgba(0, 0, 0, 0.67), -1px 0 .25px rgba(0, 0, 0, 0.67);
+            background: linear-gradient(to top right, #009f70, #bbcf00);
+            padding: 5px 10px;
+            border-radius: 8px;
+            margin-right: 16px;
+            z-index: 666;
+            cursor: default;
+        `
     });
 
-    const observer = new MutationObserver((mutations) =>
+    const insertLogo = () =>
     {
-        for (const mutation of mutations)
+        const headerContainer = document.querySelector("#header_icon_container");
+        const headerContainerDiv = headerContainer?.querySelector("div");
+        if (headerContainer && headerContainerDiv)
         {
-            if (mutation.addedNodes.length > 0 && mutation.addedNodes[0].matches("#dealer_header_container > div"))
-            {
-                const headerContainer = document.querySelector("#dealer_header_container");
-                const headerContainerDiv = document.querySelector("#dealer_header_container > div");
-                headerContainer.insertBefore(logoDiv, headerContainerDiv);
-                observer.disconnect();
-            }
+            headerContainer.insertBefore(logoDiv, headerContainerDiv);
+            return true;
         }
-    });
+        return false;
+    };
 
-    observer.observe(document.querySelector("#dealer_header_container"), { childList: true });
+    if (!insertLogo())
+    {
+        new MutationObserver((observer) =>
+        {
+            if (insertLogo()) observer.disconnect();
+        }).observe(document.body, { childList: true, subtree: true });
+    }
 
     // Gömmer gråa rader
 
@@ -106,7 +109,7 @@
                 display: "inline-block", fontFamily: "Arial, sans-serif", fontSize: "12px",
                 fontWeight: "bold", color: "#ffffff", textShadow: "-1px 1px .125px rgba(0, 0, 0, 0.67)",
                 background: "linear-gradient(to bottom left, #009f70, #bbcf00)", padding: "4px 8px",
-                borderRadius: "6px", margin: "inherit", cursor: "pointer", userSelect: "none"
+                borderRadius: "6px", marginRight: "16px", cursor: "pointer", userSelect: "none"
             });
 
             Object.assign(cleanButton.style, {
@@ -136,22 +139,26 @@
 
         const { cleanButton, cleanButtonLabel } = createCleanButton();
 
-        const observer = new MutationObserver((mutations) =>
+        const insertButton = () =>
         {
-            for (const mutation of mutations)
+            const headerContainer = document.querySelector("#header_icon_container");
+            const headerContainerDiv = headerContainer?.querySelector("div");
+            if (headerContainer && headerContainerDiv)
             {
-                if (mutation.addedNodes.length > 0 && mutation.addedNodes[0].matches("#dealer_header_container > div"))
-                {
-                    const headerContainer = document.querySelector("#dealer_header_container");
-                    headerContainer.insertBefore(cleanButtonLabel, headerContainer.firstChild);
-                    headerContainer.insertBefore(cleanButton, cleanButtonLabel);
-                    observer.disconnect();
-                }
+                headerContainer.insertBefore(cleanButtonLabel, headerContainer.firstChild);
+                headerContainer.insertBefore(cleanButton, cleanButtonLabel);
+                return true;
             }
-        });
+            return false;
+        }
 
-        const targetNode = document.querySelector("#dealer_header_container");
-        if (targetNode) observer.observe(targetNode, { childList: true });
+        if (!insertButton())
+        {
+            new MutationObserver((observer) =>
+            {
+                if (insertButton()) observer.disconnect();
+            }).observe(document.body, { childList: true, subtree: true });
+        }
 
         const tableObserver = new MutationObserver(() =>
         {
