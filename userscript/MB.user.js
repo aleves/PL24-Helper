@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - MB
 // @namespace    http://tampermonkey.net/
-// @version      2.23
+// @version      2.24
 // @description  PL24 Helper - MB
 // @author       aleves
 // @match        https://www.partslink24.com/p5/*/p5.html*
@@ -17,6 +17,7 @@
     if (
         (
             !window.location.hash.includes("p5daimler~mercedes_parts") &&
+            !window.location.hash.includes("p5daimler~mercedesclassic_parts") &&
             !window.location.hash.includes("p5daimler~mercedestrucks_parts") &&
             !window.location.hash.includes("p5daimler~mercedesunimog_parts") &&
             !window.location.hash.includes("p5daimler~mercedesvans_parts")
@@ -183,22 +184,33 @@
     {
         const searchInput = document.querySelector("#search_query");
         const searchIcon = document.querySelector("#search_icon");
-        const removeWhitespace = (value) =>
-            value.replace(/\s/g, "");
+
+        const removeWhitespaceIfMostlyNumbers = (value) =>
+        {
+            const noWhitespace = value.replace(/\s/g, "");
+            const digits = noWhitespace.match(/\d/g) || [];
+            const letters = noWhitespace.match(/[a-zA-Z]/g) || [];
+
+            if (digits.length > letters.length / 2)
+            {
+                return noWhitespace;
+            }
+            return value;
+        };
 
         searchInput.addEventListener("keydown", (event) =>
         {
             if (event.key === "Enter")
             {
                 event.preventDefault();
-                searchInput.value = removeWhitespace(searchInput.value);
+                searchInput.value = removeWhitespaceIfMostlyNumbers(searchInput.value);
             }
         });
 
         searchIcon.addEventListener("mousedown", (event) =>
         {
             event.preventDefault();
-            searchInput.value = removeWhitespace(searchInput.value);
+            searchInput.value = removeWhitespaceIfMostlyNumbers(searchInput.value);
         });
     }
 

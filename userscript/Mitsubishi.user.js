@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Mitsubishi
 // @namespace    http://tampermonkey.net/
-// @version      2.23
+// @version      2.24
 // @description  PL24 Helper - Mitsubishi
 // @author       aleves
 // @match        https://www.partslink24.com/p5/*/p5.html*
@@ -176,22 +176,33 @@
     {
         const searchInput = document.querySelector("#search_query");
         const searchIcon = document.querySelector("#search_icon");
-        const removeWhitespace = (value) =>
-            value.replace(/\s/g, "");
+
+        const removeWhitespaceIfMostlyNumbers = (value) =>
+        {
+            const noWhitespace = value.replace(/\s/g, "");
+            const digits = noWhitespace.match(/\d/g) || [];
+            const letters = noWhitespace.match(/[a-zA-Z]/g) || [];
+
+            if (digits.length > letters.length / 2)
+            {
+                return noWhitespace;
+            }
+            return value;
+        };
 
         searchInput.addEventListener("keydown", (event) =>
         {
             if (event.key === "Enter")
             {
                 event.preventDefault();
-                searchInput.value = removeWhitespace(searchInput.value);
+                searchInput.value = removeWhitespaceIfMostlyNumbers(searchInput.value);
             }
         });
 
         searchIcon.addEventListener("mousedown", (event) =>
         {
             event.preventDefault();
-            searchInput.value = removeWhitespace(searchInput.value);
+            searchInput.value = removeWhitespaceIfMostlyNumbers(searchInput.value);
         });
     }
 
@@ -223,7 +234,7 @@
                 else
                 {
                     const partNumber = td.closest("[id*=\"_c\"]")
-                        .querySelector("[class*=\"_id\"]")
+                        .querySelector("[class*=\"_partno\"]")
                         .innerText.trim().replace("* ", "").replace(/\s/g, "");
                     const button = document.createElement("button");
                     button.innerText = td.innerText;
@@ -282,7 +293,7 @@
         const targetNode = document.querySelector("#content");
         const runCode = () =>
         {
-            const partnoTds = [...document.querySelectorAll("[class*=acc][class*=p5t][class*=id]")]
+            const partnoTds = [...document.querySelectorAll("[class*=acc][class*=p5t][class*=partno]")]
                 .flatMap(div => (div.className.endsWith("_acc") || div.getAttribute("title") === "Artikelnummer") ? [] : [div])
                 .sort((a, b) => a.className > b.className ? 1 : -1);
             partnoTds.forEach(td =>
