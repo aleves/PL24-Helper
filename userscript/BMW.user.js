@@ -39,7 +39,7 @@
     const createLogo = () =>
     {
         const logo = document.createElement("div");
-        logo.textContent = "PL24 Helper - Audi";
+        logo.textContent = "PL24 Helper - BMW";
         logo.title = `v${GM_info.script.version}`;
         logo.style.cssText = `
             display: block;
