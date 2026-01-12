@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - BMW
 // @namespace    http://tampermonkey.net/
-// @version      2.25
+// @version      2.26
 // @description  PL24 Helper - BMW
 // @author       aleves
 // @match        https://www.partslink24.com/pl24-app*
@@ -500,6 +500,42 @@
             {
                 spinnerVisible = false;
                 colorHeaders();
+            }
+        };
+
+        observeLoadAnimation();
+        new MutationObserver(observeLoadAnimation).observe(targetNode, { childList: true, subtree: true });
+    }
+
+    // Ändrar färgen på avdelare för att göra det tydligare
+
+    if (document.querySelector("#root"))
+    {
+        const targetNode = document.querySelector("#root");
+
+        const colorEmptyRows = () =>
+        {
+            const emptyRows = document.querySelectorAll("[class*=_emptyRow]")
+
+            for (const er of emptyRows)
+            {
+                er.style.background = "#f7c40057"
+            }
+        };
+
+        let spinnerVisible = false;
+
+        const observeLoadAnimation = () =>
+        {
+            const spinner = document.querySelector("[class*=_main] [class*=spinner-wrapper]");
+            if (spinner)
+            {
+                spinnerVisible = true;
+            }
+            else if (spinnerVisible)
+            {
+                spinnerVisible = false;
+                colorEmptyRows();
             }
         };
 
