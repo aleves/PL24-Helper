@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Iveco
 // @namespace    Violentmonkey Scripts
-// @version      1.01
+// @version      1.02
 // @description  PL24 Helper - Iveco
 // @author       aleves
 // @match        https://www.partslink24.com/iveco/*
@@ -18,6 +18,7 @@
 
     const logoDiv = document.createElement("div");
     logoDiv.textContent = "PL24 Helper - Iveco";
+    logoDiv.title = `v${GM_info.script.version}`
     Object.assign(logoDiv.style,
         {
             display: "inline-block",
@@ -32,7 +33,8 @@
             right: "10px",
             top: "50%",
             transform: "translateY(-50%)",
-            zIndex: "666"
+            zIndex: "666",
+            cursor: "default"
         });
     document.querySelector("#linksAndBreadCrumbs")
         .appendChild(logoDiv);
@@ -89,14 +91,14 @@
             const priceTds = document.querySelectorAll("#partin4content td.partinfoPriceCol:not(.partin4partspromCol)");
             priceTds.forEach((td) =>
             {
-                const priceText = td.innerText.trim()
+                const priceText = td.textContent.trim()
                     .replace(/\s/g, "");
                 const price = parseFloat(priceText);
                 if (!isNaN(price))
                 {
                     const newPrice = price / 2;
                     const span = document.createElement("span");
-                    span.innerText = `\n / ${newPrice.toLocaleString("sv-SE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    span.textContent = `\n / ${newPrice.toLocaleString("sv-SE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                     span.style.fontSize = "9.25px";
                     span.classList.add("new-price");
                     td.appendChild(span);
@@ -105,9 +107,9 @@
                 {
                     const partNumber = td.closest("tr")
                         .querySelector(".partinfoPartnoCol")
-                        .innerText.trim();
+                        .textContent.trim();
                     const button = document.createElement("button");
-                    button.innerText = td.innerText;
+                    button.textContent = td.textContent;
                     button.title = "Sök på Bildelsbasen (Ny flik)";
                     button.addEventListener("click", (event) =>
                     {
@@ -132,7 +134,7 @@
                         textAlign: "center"
                     };
                     Object.assign(button.style, buttonStyle);
-                    td.innerText = "";
+                    td.textContent = "";
                     td.appendChild(button);
                 }
             });
@@ -171,19 +173,19 @@
             const partnoTds = document.querySelectorAll("#partin4content td.partinfoPartnoCol");
             partnoTds.forEach(td =>
             {
-                if (td.innerText.trim() === "")
+                if (td.textContent.trim() === "")
                 {
                     return;
                 }
 
                 const btn = document.createElement("button");
-                btn.innerText = td.innerText;
+                btn.textContent = td.textContent;
                 btn.title = "Kopiera nummer";
                 btn.addEventListener("click", event =>
                 {
-                    navigator.clipboard.writeText(td.innerText.trim());
+                    navigator.clipboard.writeText(td.textContent.trim());
                     const notification = document.createElement("div");
-                    notification.innerText = "Kopierad!";
+                    notification.textContent = "Kopierad!";
                     Object.assign(notification.style,
                         {
                             position: "absolute",
@@ -229,7 +231,7 @@
                         boxSizing: "border-box",
                         textAlign: "center"
                     });
-                td.innerText = "";
+                td.textContent = "";
                 td.appendChild(btn);
             });
         };
@@ -263,13 +265,13 @@
     if (document.querySelector("#partin4content"))
     {
         const partin4content = document.querySelector("#partin4content");
-        const observer = new MutationObserver(() => 
+        const observer = new MutationObserver(() =>
         {
             const partin4TabSupersessionsLink = document.querySelector("#partin4Tab-supersessions > a");
-            if (partin4TabSupersessionsLink && partin4TabSupersessionsLink.getAttribute("href") === "#partin4TabDiv-supersessions") 
+            if (partin4TabSupersessionsLink && partin4TabSupersessionsLink.getAttribute("href") === "#partin4TabDiv-supersessions")
             {
                 const partInfoTabsUl = document.querySelector("#partInfoTabs > ul");
-                if (partInfoTabsUl) 
+                if (partInfoTabsUl)
                 {
                     partInfoTabsUl.style.backgroundImage = "linear-gradient(to right, #ff6a2b, #f7c400)";
                 }

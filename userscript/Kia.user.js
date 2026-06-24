@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Kia
 // @namespace    Violentmonkey Scripts
-// @version      1.02
+// @version      1.03
 // @description  PL24 Helper - Kia
 // @author       aleves
 // @match        https://www.partslink24.com/hyundai-kia-automotive-group/kia_parts/*
@@ -91,14 +91,14 @@
             const priceTds = document.querySelectorAll("#partin4content td.partinfoPriceCol:not(.partin4partspromCol)");
             priceTds.forEach((td) =>
             {
-                const priceText = td.innerText.trim()
+                const priceText = td.textContent.trim()
                     .replace(/\s/g, "");
                 const price = parseFloat(priceText);
                 if (!isNaN(price))
                 {
                     const newPrice = price / 2;
                     const span = document.createElement("span");
-                    span.innerText = `\n / ${newPrice.toLocaleString("sv-SE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    span.textContent = `\n / ${newPrice.toLocaleString("sv-SE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                     span.style.fontSize = "9.25px";
                     span.classList.add("new-price");
                     td.appendChild(span);
@@ -107,9 +107,9 @@
                 {
                     const partNumber = td.closest("tr")
                         .querySelector(".partinfoPartnoCol")
-                        .innerText.trim();
+                        .textContent.trim();
                     const button = document.createElement("button");
-                    button.innerText = td.innerText;
+                    button.textContent = td.textContent;
                     button.title = "Sök på Bildelsbasen (Ny flik)";
                     button.addEventListener("click", (event) =>
                     {
@@ -134,7 +134,7 @@
                         textAlign: "center"
                     };
                     Object.assign(button.style, buttonStyle);
-                    td.innerText = "";
+                    td.textContent = "";
                     td.appendChild(button);
                 }
             });
@@ -173,18 +173,18 @@
             const partnoTds = document.querySelectorAll("#partin4content td.partinfoPartnoCol");
             partnoTds.forEach(td =>
             {
-                if (td.innerText.trim() === "")
+                if (td.textContent.trim() === "")
                 {
                     return;
                 }
 
                 const btn = document.createElement("button");
-                btn.innerText = td.innerText;
+                btn.textContent = td.textContent;
                 btn.title = "Vänsterklick = Kopiera nummer\nHögerklick = Kopiera nummer utan mellanslag";
                 btn.addEventListener("mouseup", event =>
                 {
                     let notificationText = "";
-                    const partno = td.innerText.trim();
+                    const partno = td.textContent.trim();
                     if (event.button === 2)
                     {
                         const cleanedPartno = partno.replace(/\s/g, "");
@@ -198,7 +198,7 @@
                     }
 
                     const notification = document.createElement("div");
-                    notification.innerText = notificationText;
+                    notification.textContent = notificationText;
                     Object.assign(notification.style, {
                         position: "absolute",
                         top: `${event.pageY - 40}px`,
@@ -247,7 +247,7 @@
                     event.stopPropagation();
                     return false;
                 });
-                td.innerText = "";
+                td.textContent = "";
                 td.appendChild(btn);
             });
         };

@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Citroën
 // @namespace    Violentmonkey Scripts
-// @version      2.27
+// @version      2.28
 // @description  PL24 Helper - Citroën
 // @author       aleves
 // @match        https://www.partslink24.com/pl24-app*
@@ -272,14 +272,14 @@
                 .filter(e => !e.closest("[class*=_showPrintOnly]"));
             priceTds.forEach((td) =>
             {
-                const priceText = td.innerText.trim()
+                const priceText = td.textContent.trim()
                     .replace(/\s/g, "");
                 const price = parseFloat(priceText);
                 if (!isNaN(price))
                 {
                     const newPrice = price / 2;
                     const span = document.createElement("span");
-                    span.innerText = `\n / ${newPrice.toLocaleString("sv-SE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    span.textContent = `\n / ${newPrice.toLocaleString("sv-SE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                     span.style.fontSize = "11.75px";
                     span.classList.add("new-price");
                     td.appendChild(span);
@@ -288,9 +288,9 @@
                 {
                     const partNumber = td.closest("[data-test-id*=row]")
                         .querySelector("[data-test-id*=partnoValue] [class*=_value]")
-                        .innerText.trim().replace("* ", "").replace(/\s/g, "");
+                        .textContent.trim().replace("* ", "").replace(/\s/g, "");
 
-                    if (!td.innerText.trim() || td.dataset.hasOverlay) return;
+                    if (!td.textContent.trim() || td.dataset.hasOverlay) return;
                     td.dataset.hasOverlay = "true";
                     td.style.position = "relative";
                     td.style.color = "transparent";
@@ -310,7 +310,7 @@
 
                     const shadow = host.attachShadow({ mode: "open" });
                     const btn = document.createElement("button");
-                    btn.innerText = td.innerText;
+                    btn.textContent = td.textContent;
                     btn.title = "Sök på Bildelsbasen (Ny flik)";
                     Object.assign(btn.style, {
                         pointerEvents: "auto",
@@ -356,6 +356,7 @@
         new MutationObserver(observeLoadAnimation).observe(targetNode, { childList: true, subtree: true });
     }
 
+
     // Gör om PC-nummer i rutorna som öppnas till knappar som kopierar numret åt användaren
 
     if (document.querySelector("#root"))
@@ -367,24 +368,32 @@
                 .filter(e => !e.closest("[class*=_showPrintOnly]"));
             partnoTds.forEach(td =>
             {
-                if (td.innerText.trim() === "")
+                if (td.textContent.trim() === "")
                 {
                     return;
                 }
 
                 const btn = document.createElement("button");
-                btn.innerText = td.innerText;
-                btn.title = "Kopiera nummer";
+                btn.textContent = td.textContent;
+                btn.title = "Vänsterklick = Kopiera nummer\nHögerklick = Kopiera nummer utan mellanslag";
                 btn.addEventListener("mouseup", event =>
                 {
                     let notificationText = "";
-                    const partno = td.innerText.trim();
-
-                    navigator.clipboard.writeText(partno.replace("* ", "").replace(/\s+/g, " "));
-                    notificationText = "Kopierad!";
+                    const partno = td.textContent.trim();
+                    if (event.button === 2)
+                    {
+                        const cleanedPartno = partno.replace(/\s/g, "");
+                        navigator.clipboard.writeText(cleanedPartno);
+                        notificationText = "Kopierad utan mellanslag!";
+                    }
+                    else
+                    {
+                        navigator.clipboard.writeText(partno.replace("* ", "").replace(/\s+/g, " "));
+                        notificationText = "Kopierad!";
+                    }
 
                     const notification = document.createElement("div");
-                    notification.innerText = notificationText;
+                    notification.textContent = notificationText;
                     Object.assign(notification.style, {
                         position: "absolute",
                         top: `${event.pageY - 40}px`,
@@ -433,7 +442,7 @@
                     event.stopPropagation();
                     return false;
                 });
-                td.innerText = "";
+                td.textContent = "";
                 td.appendChild(btn);
             });
         };
@@ -553,9 +562,9 @@
                 if (document.querySelector("[class*=inline_error]"))
                 {
                     const listError = document.querySelector("[class*=inline_error]");
-                    const vinNum = document.querySelector("[class*=p5_vehicle_info_vin]").innerText.trim();
+                    const vinNum = document.querySelector("[class*=p5_vehicle_info_vin]").textContent.trim();
                     const button = document.createElement("button");
-                    button.innerText = "Sök chassinummer/VIN på PartSouq (Ny flik)";
+                    button.textContent = "Sök chassinummer/VIN på PartSouq (Ny flik)";
                     button.addEventListener("click", (event) =>
                     {
                         const searchUrl = `https://partsouq.com/en/search/all?q=${vinNum}`;
