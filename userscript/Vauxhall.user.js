@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Vauxhall
 // @namespace    Violentmonkey Scripts
-// @version      2.28
+// @version      2.29
 // @description  PL24 Helper - Vauxhall
 // @author       aleves
 // @match        https://www.partslink24.com/pl24-app*
@@ -76,7 +76,7 @@
     {
         const toggleUnavailableRows = (isChecked) =>
         {
-            document.querySelectorAll("[class*=_table] [data-test-id*=row][class*=_inactive]")
+            document.querySelectorAll("[class*=_table] [data-testid*=row][class*=_inactive]")
                 .forEach(element => element.style.display = isChecked ? "none" : "");
 
             document.querySelectorAll("[class*=_tiles] [class*=_inactive]")
@@ -174,7 +174,7 @@
             if (cleanButton.checked) toggleUnavailableRows(true);
         });
 
-        const tableNode = document.querySelector("[data-test-id=subGroupsIllusTable]");
+        const tableNode = document.querySelector("[data-testid=subGroupsIllusTable]");
         if (tableNode) tableObserver.observe(tableNode, { childList: true, subtree: true });
 
         if (cleanButton.checked)
@@ -190,7 +190,7 @@
     {
         "use strict";
 
-        const searchInput = "#\\:r3\\:";
+        const searchInput = "#\\:r4\\:";
 
         const removeWhitespaceIfMostlyNumbers = (value) =>
         {
@@ -237,7 +237,7 @@
             "click",
             function (event)
             {
-                const button = event.target.closest("[data-test-id=\"sendPartSearch\"]");
+                const button = event.target.closest("[data-testid=\"sendPartSearch\"]");
                 if (!button) return;
 
                 const input = document.querySelector(searchInput);
@@ -263,7 +263,7 @@
             if (existingNewPrices.length > 0) return;
             */
 
-            const priceTds = [...document.querySelectorAll("[class*=_segmentContainer] [data-test-id*=priceValue] [class*=_value]")]
+            const priceTds = [...document.querySelectorAll("[class*=_segmentContainer] [data-testid*=priceValue] [class*=_value]")]
                 .filter(e => !e.closest("[class*=_showPrintOnly]"));
             priceTds.forEach((td) =>
             {
@@ -281,8 +281,8 @@
                 }
                 else
                 {
-                    const partNumber = td.closest("[data-test-id*=row]")
-                        .querySelector("[data-test-id*=partnoValue] [class*=_value]")
+                    const partNumber = td.closest("[data-testid*=row]")
+                        .querySelector("[data-testid*=partnoValue] [class*=_value]")
                         .textContent.trim().replace("* ", "").replace(/\s/g, "");
 
                     if (!td.textContent.trim() || td.dataset.hasOverlay) return;
@@ -335,7 +335,7 @@
 
         const observeLoadAnimation = () =>
         {
-            const spinner = document.querySelector("[class*=_main] [class*=_loading] [class*=spinner-wrapper]");
+            const spinner = document.querySelector("[class*=_main] [class*=MuiCircularProgress-root]");
             if (spinner)
             {
                 spinnerVisible = true;
@@ -358,7 +358,7 @@
         const targetNode = document.querySelector("#root");
         const runCode = () =>
         {
-            const partnoTds = [...document.querySelectorAll("[class*=_segmentContainer] [data-test-id*=partnoValue] [class*=_value]")]
+            const partnoTds = [...document.querySelectorAll("[class*=_segmentContainer] [data-testid*=partnoValue] [class*=_value]")]
                 .filter(e => !e.closest("[class*=_showPrintOnly]"));
             partnoTds.forEach(td =>
             {
@@ -445,7 +445,7 @@
 
         const observeLoadAnimation = () =>
         {
-            const spinner = document.querySelector("[class*=_main] [class*=_loading] [class*=spinner-wrapper]");
+            const spinner = document.querySelector("[class*=_main] [class*=MuiCircularProgress-root]");
             if (spinner)
             {
                 spinnerVisible = true;
@@ -490,52 +490,7 @@
 
         const observeLoadAnimation = () =>
         {
-            const spinner = document.querySelector("[class*=_main] [class*=_loading] [class*=spinner-wrapper]");
-            if (spinner)
-            {
-                spinnerVisible = true;
-            }
-            else if (spinnerVisible)
-            {
-                spinnerVisible = false;
-                colorHeaders();
-            }
-        };
-
-        observeLoadAnimation();
-        new MutationObserver(observeLoadAnimation).observe(targetNode, { childList: true, subtree: true });
-    }
-
-    // Ändrar färgen på 'Nummerändring' för att göra det tydligare
-
-    if (document.querySelector("#root"))
-    {
-        const targetNode = document.querySelector("#root");
-
-        const colorHeaders = () =>
-        {
-            const muiAccHeaderTitles = [...document.querySelectorAll("[class*=MuiAccordionSummary-content]")]
-                .filter(e => !e.closest("[class*=_showPrintOnly]"));
-
-            for (const title of muiAccHeaderTitles)
-            {
-                const muiAccHeader = title.closest("[class*=MuiAccordionSummary-root]");
-                if (title.textContent.trim() === "Nummerändring")
-                {
-                    if (muiAccHeader) muiAccHeader.style.backgroundImage = "linear-gradient(to right, #ff6a2b, #f7c400)";
-                }
-                if (title.textContent.trim() === "Bytesartikel")
-                {
-                    if (muiAccHeader) muiAccHeader.style.backgroundImage = "linear-gradient(to right, #78d7ff, #456cff)";
-                }
-            }
-        };
-
-        let spinnerVisible = false;
-
-        const observeLoadAnimation = () =>
-        {
-            const spinner = document.querySelector("[class*=_main] [class*=_loading] [class*=spinner-wrapper]");
+            const spinner = document.querySelector("[class*=_main] [class*=MuiCircularProgress-root]");
             if (spinner)
             {
                 spinnerVisible = true;
@@ -571,7 +526,7 @@
 
         const observeLoadAnimation = () =>
         {
-            const spinner = document.querySelector("[class*=_main] [class*=spinner-wrapper]");
+            const spinner = document.querySelector("[class*=_main] [class*=MuiCircularProgress-root]");
             if (spinner)
             {
                 spinnerVisible = true;
