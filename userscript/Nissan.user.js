@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Nissan
 // @namespace    Violentmonkey Scripts
-// @version      1.01
+// @version      1.07
 // @description  PL24 Helper - Nissan
 // @author       aleves
 // @match        https://www.partslink24.com/nissan/nissan_parts/*
@@ -113,7 +113,7 @@
                     button.title = "Sök på Bildelsbasen (Ny flik)";
                     button.addEventListener("click", (event) =>
                     {
-                        const searchUrl = `https://www.bildelsbasen.se/se-sv/OEM/${partNumber}/?page=1&order=price&asc=1`;
+                        const searchUrl = `https://www.bildelsbasen.se/se-sv/OEM/${partNumber}/`;
                         window.open(searchUrl, "_blank");
                         event.preventDefault();
                         event.stopPropagation();

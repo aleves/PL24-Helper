@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Hyundai
 // @namespace    Violentmonkey Scripts
-// @version      1.04
+// @version      1.07
 // @description  PL24 Helper - Hyundai
 // @author       aleves
 // @match        https://www.partslink24.com/hyundai-kia-automotive-group/hyundai_parts/*
@@ -113,7 +113,7 @@
                     button.title = "Sök på Bildelsbasen (Ny flik)";
                     button.addEventListener("click", (event) =>
                     {
-                        const searchUrl = `https://www.bildelsbasen.se/se-sv/OEM/${partNumber}/?page=1&order=price&asc=1`;
+                        const searchUrl = `https://www.bildelsbasen.se/se-sv/OEM/${partNumber}/`;
                         window.open(searchUrl, "_blank");
                         event.preventDefault();
                         event.stopPropagation();
@@ -277,8 +277,6 @@
     }
 
     // Ändrar färgen på 'Nummerändring' så att risken att man missar det är lägre
-
-    // Då jag inte har funnit ett exempel på detta hittills så är detta inaktiverat tillsvidare
 
     if (document.querySelector("#partin4content"))
     {

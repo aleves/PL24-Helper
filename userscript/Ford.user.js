@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - Ford
 // @namespace    Violentmonkey Scripts
-// @version      1.06
+// @version      1.07
 // @description  PL24 Helper - Ford
 // @author       aleves
 // @match        https://www.partslink24.com/ford/fordp_parts/*
@@ -114,7 +114,7 @@
                     button.title = "Sök på Bildelsbasen (Ny flik)";
                     button.addEventListener("click", (event) =>
                     {
-                        const searchUrl = `https://www.bildelsbasen.se/se-sv/OEM/${partNumber}/?page=1&order=price&asc=1`;
+                        const searchUrl = `https://www.bildelsbasen.se/se-sv/OEM/${partNumber}/`;
                         window.open(searchUrl, "_blank");
                         event.preventDefault();
                         event.stopPropagation();
