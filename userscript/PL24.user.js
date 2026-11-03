@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         PL24 Helper - PL24
 // @namespace    http://tampermonkey.net/
-// @version      2.30
+// @version      2.31
 // @description  PL24 Helper - PL24
 // @author       aleves
 // @match        https://www.partslink24.com/pl24-app*
@@ -22,26 +22,51 @@
 
     const manufacturer = await new Promise(resolve =>
     {
-        const checkTitle = () =>
+        let resolved = false;
+
+        const finish = value =>
         {
-            if (document.title.trim().toLowerCase() !== "partslink24")
+            if (resolved)
             {
-                resolve(document.title.split(/,| - partslink24/)[0].trim());
-                observer.disconnect();
+                return;
+            }
+
+            resolved = true;
+            observer.disconnect();
+            resolve(value);
+        };
+
+        const checkSpinner = () =>
+        {
+            const spinner = document.querySelector("[class*=_main] [class*=MuiCircularProgress-root]");
+
+            if (spinner)
+            {
+                finish(document.title.split(/,| - partslink24/)[0].trim());
             }
         };
 
-        const observer = new MutationObserver(checkTitle);
-        observer.observe(document.head, { childList: true, subtree: true });
+        const observer = new MutationObserver(checkSpinner);
 
-        checkTitle();
+        try
+        {
+            observer.observe(document, { childList: true, subtree: true });
+        }
+        catch (error)
+        {
+            finish("");
+            return;
+        }
+
+        checkSpinner();
 
         setTimeout(() =>
         {
-            observer.disconnect();
-            resolve("");
+            finish("");
         }, 15000);
     });
+
+    console.warn("Manufacturer:", manufacturer);
 
     // Logotyp för att indikera att skriptet är igång
 
